@@ -7,6 +7,7 @@ from schemas.submission_schema import SubmissionSchema
 
 from utils.auth_middleware import verify_token
 from utils.role_checker import teacher_only
+from ai.quiz_generator import generate_quiz
 
 router = APIRouter()
 
@@ -116,4 +117,18 @@ def view_results(
 
     return {
         "results": results
+    }
+@router.post("/generate-ai-quiz")
+def generate_ai_quiz():
+
+    sample_notes = """
+    Operating System is system software
+    that manages computer hardware
+    and software resources.
+    """
+
+    quiz = generate_quiz(sample_notes)
+
+    return {
+        "quiz": quiz
     }
