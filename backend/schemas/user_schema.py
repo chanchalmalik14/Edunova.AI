@@ -1,8 +1,13 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
 
 class UserSchema(BaseModel):
-    name: str
-    email: EmailStr
+
+    full_name: str
+    school_name: str
+    student_class: str
+
+    email: str
     password: str
+
     role: str

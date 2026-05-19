@@ -40,9 +40,13 @@ def register_user(user: UserSchema):
 
     # Create user data
     user_data = {
-    "name": user.name,
+    "full_name": user.full_name,
+    "school_name": user.school_name,
+    "student_class": user.student_class,
+
     "email": user.email,
     "password": hashed_pw,
+
     "role": user.role
 }
 
@@ -88,7 +92,9 @@ def login_user(
 
     return {
         "access_token": token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "role": existing_user["role"],
+        "full_name": existing_user["full_name"]
     }
 
 @router.get("/profile")
