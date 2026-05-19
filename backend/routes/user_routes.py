@@ -84,11 +84,19 @@ def login_user(
         }
 
     token = create_access_token(
-        data={
-            "email": existing_user["email"],
-            "role": existing_user["role"]
-        }
-    )
+    data={
+
+        "email": existing_user["email"],
+
+        "role": existing_user["role"],
+
+        "student_class":
+            existing_user["student_class"],
+
+        "school_name":
+            existing_user["school_name"]
+    }
+)
 
     return {
         "access_token": token,

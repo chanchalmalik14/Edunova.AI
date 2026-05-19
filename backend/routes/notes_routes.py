@@ -2,7 +2,8 @@ from fastapi import (
     APIRouter,
     UploadFile,
     File,
-    Depends
+    Depends,
+    Form
 )
 from fastapi.responses import FileResponse
 from ai.gemini_service import (
@@ -25,7 +26,15 @@ notes_collection = db["notes"]
 
 @router.post("/upload-note")
 def upload_note(
+
+    title: str = Form(...),
+
+    subject: str = Form(...),
+
+    student_class: str = Form(...),
+
     file: UploadFile = File(...),
+
     user_data = Depends(verify_token)
 ):
 
@@ -44,10 +53,19 @@ def upload_note(
 
     # Save metadata in MongoDB
     note_data = {
-        "filename": file.filename,
-        "uploaded_by": user_data["email"],
-        "file_path": file_path
-    }
+
+    "title": title,
+
+    "subject": subject,
+
+    "student_class": student_class,
+
+    "filename": file.filename,
+
+    "uploaded_by": user_data["email"],
+
+    "file_path": file_path
+}
 
     notes_collection.insert_one(note_data)
 
@@ -60,9 +78,15 @@ def get_notes(
     user_data = Depends(verify_token)
 ):
 
+    student_class = user_data.get("student_class")
+
     notes = list(
+
         notes_collection.find(
-            {},
+            {
+                "student_class": student_class
+            },
+
             {
                 "_id": 0
             }
