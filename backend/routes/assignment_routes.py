@@ -40,10 +40,21 @@ def get_assignments(
     user_data = Depends(verify_token)
 ):
 
+    student_class = user_data.get(
+        "student_class"
+    )
+
     assignments = list(
+
         assignment_collection.find(
-            {},
-            {"_id": 0}
+            {
+                "student_class":
+                    student_class
+            },
+
+            {
+                "_id": 0
+            }
         )
     )
 
