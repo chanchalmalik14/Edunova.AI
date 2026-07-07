@@ -13,6 +13,7 @@ def get_analytics(user_data = Depends(verify_token)):
         # 1. Quizzes Completed
         quiz_results = list(db["results"].find({"student_email": email}))
         quizzes_completed = len(quiz_results)
+        quiz_titles = [res.get("quiz_title") for res in quiz_results]
 
         # 2. Learning Score (Average Quiz Performance as a %)
         if quizzes_completed > 0:
@@ -35,7 +36,8 @@ def get_analytics(user_data = Depends(verify_token)):
                 "quizzes_completed": quizzes_completed,
                 "learning_score": f"{learning_score}%",
                 "assignments_completed": assignments_completed,
-                "notes_available": notes_available
+                "notes_available": notes_available,
+                "quiz_titles": quiz_titles
             }
         }
 
