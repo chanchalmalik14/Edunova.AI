@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends
-
+import json
+from pydantic import BaseModel
 from database.db import db
-
 from schemas.quiz_schema import QuizSchema
 from schemas.submission_schema import SubmissionSchema
-
 from utils.auth_middleware import verify_token
 from utils.role_checker import teacher_only
 from ai.quiz_generator import generate_quiz
@@ -118,17 +117,32 @@ def view_results(
     return {
         "results": results
     }
+class QuizGenerationRequest(BaseModel):
+    text: str
+
+
 @router.post("/generate-ai-quiz")
-def generate_ai_quiz():
+def generate_ai_quiz(
+    request: QuizGenerationRequest,
+    user_data = Depends(verify_token)
+):
+    teacher_only(user_data)
 
-    sample_notes = """
-    Operating System is system software
-    that manages computer hardware
-    and software resources.
-    """
+    raw_quiz = generate_quiz(request.text)
 
-    quiz = generate_quiz(sample_notes)
-
-    return {
-        "quiz": quiz
-    }
+    # Parse and clean response from Gemini
+    try:
+        cleaned = raw_quiz.strip()
+        if cleaned.startswith("```json"):
+            cleaned = cleaned[7:]
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3]
+        cleaned = cleaned.strip()
+        
+        quiz_dict = json.loads(cleaned)
+        return {"quiz": quiz_dict}
+    except Exception as e:
+        return {
+            "error": f"Failed to generate valid JSON: {str(e)}",
+            "raw": raw_quiz
+        }
