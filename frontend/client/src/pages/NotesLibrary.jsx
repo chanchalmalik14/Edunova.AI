@@ -13,10 +13,24 @@ function NotesLibrary() {
   // Load Notes
   useEffect(() => {
 
-    const storedNotes =
-      JSON.parse(localStorage.getItem("notes")) || [];
+    const fetchNotes = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://127.0.0.1:8000/get-notes", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        if (response.ok && data.notes) {
+          setNotes(data.notes);
+        }
+      } catch (error) {
+        console.error("Error loading notes:", error);
+      }
+    };
 
-    setNotes(storedNotes);
+    fetchNotes();
 
   }, []);
 
@@ -64,7 +78,7 @@ function NotesLibrary() {
         {notes.map((note) => (
 
           <div
-            key={note.id}
+            key={note.filename}
             className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 flex flex-col md:flex-row md:items-center justify-between gap-6"
           >
 
@@ -89,17 +103,20 @@ function NotesLibrary() {
               </p>
 
               <p className="text-gray-500 mt-3">
-                📄 {note.fileName}
+                📄 {note.filename}
               </p>
 
               <p className="text-gray-600 mt-4 text-sm">
-                Uploaded: {note.uploadedAt}
+                Uploaded By: {note.uploaded_by}
               </p>
 
             </div>
 
             {/* Download */}
-            <button
+            <a
+              href={`http://127.0.0.1:8000/download-note/${note.filename}`}
+              target="_blank"
+              rel="noreferrer"
               className="bg-blue-500 hover:bg-blue-600 transition-all duration-300 px-6 py-4 rounded-2xl flex items-center gap-3"
             >
 
@@ -107,7 +124,7 @@ function NotesLibrary() {
 
               Download
 
-            </button>
+            </a>
 
           </div>
 
