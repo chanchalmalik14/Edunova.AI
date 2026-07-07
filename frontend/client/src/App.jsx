@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 // Pages
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 
 import Dashboard from "./pages/Dashboard";
 import AINotesPage from "./pages/AINotesPage";
@@ -44,6 +45,12 @@ function App() {
       <Route
         path="/login"
         element={<LoginPage />}
+      />
+
+      {/* Register Page */}
+      <Route
+        path="/register"
+        element={<RegisterPage />}
       />
 
       {/* Student Dashboard */}

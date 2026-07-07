@@ -51,7 +51,7 @@ function Hero() {
 
         {/* Animated Button */}
         <motion.button
-          onClick={() => navigate("/login")}
+          onClick={() => navigate("/register")}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2, duration: 1 }}
