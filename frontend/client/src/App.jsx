@@ -23,8 +23,8 @@ import NotesLibrary from "./pages/NotesLibrary";
 import AnalyticsPage from "./pages/AnalyticsPage";
 
 import SettingsPage from "./pages/SettingsPage";
-
 import TeacherManagement from "./pages/TeacherManagement";
+import StudentManagement from "./pages/StudentManagement";
 
 // Protection
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -160,6 +160,14 @@ function App() {
     </ProtectedRoute>
   }
 />
+    <Route
+      path="/student-management"
+      element={
+        <ProtectedRoute>
+          <StudentManagement />
+        </ProtectedRoute>
+      }
+    />
         </Routes>
   );
 }

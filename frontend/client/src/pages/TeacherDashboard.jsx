@@ -17,21 +17,40 @@ function TeacherDashboard() {
   const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
+  const [stats, setStats] = useState({
+    total_students: 0,
+    assignments_created: 0,
+    notes_uploaded: 0
+  });
 
-  // Login Protection
+  // Login Protection & Fetch Stats
   useEffect(() => {
 
     const loggedIn = localStorage.getItem("isLoggedIn");
-
     const storedUser = localStorage.getItem("username");
+    const token = localStorage.getItem("token");
 
     if (!loggedIn || !storedUser) {
-
       navigate("/login");
-
     } else {
-
       setUsername(storedUser);
+
+      const fetchStats = async () => {
+        try {
+          const response = await fetch("http://127.0.0.1:8000/analytics", {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          const json = await response.json();
+          if (response.ok && json.stats) {
+            setStats(json.stats);
+          }
+        } catch (err) {
+          console.error("Error fetching teacher dashboard stats:", err);
+        }
+      };
+      fetchStats();
     }
 
   }, [navigate]);
@@ -62,13 +81,42 @@ function TeacherDashboard() {
         {/* Menu */}
         <div className="mt-12 flex flex-col gap-5 text-gray-300">
 
-          <div className="flex items-center gap-3 bg-white/5 p-3 rounded-xl text-white">
-
+          {/* Teacher Dashboard */}
+          <div
+            onClick={() => navigate("/teacher-dashboard")}
+            className="flex items-center gap-3 bg-white/5 p-3 rounded-xl text-white cursor-pointer hover:bg-white/10 transition"
+          >
             <LayoutDashboard size={20} />
-
-            <p>Teacher Dashboard</p>
-
+            <p>Dashboard</p>
           </div>
+
+          {/* Upload Notes */}
+          <div
+            onClick={() => navigate("/upload-notes")}
+            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+          >
+            <Upload size={20} />
+            <p>Upload Notes</p>
+          </div>
+
+          {/* Assignments */}
+          <div
+            onClick={() => navigate("/teacher-assignments")}
+            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+          >
+            <FileText size={20} />
+            <p>Assignments</p>
+          </div>
+
+          {/* Students */}
+          <div
+            onClick={() => navigate("/student-management")}
+            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+          >
+            <Users size={20} />
+            <p>Students</p>
+          </div>
+
         </div>
 
         {/* Logout */}
@@ -138,7 +186,7 @@ function TeacherDashboard() {
             </h3>
 
             <p className="text-4xl mt-4 text-blue-400 font-semibold">
-              120
+              {stats.total_students}
             </p>
 
           </div>
@@ -146,11 +194,11 @@ function TeacherDashboard() {
           <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-6">
 
             <h3 className="text-gray-400">
-              Assignments
+              Assignments Created
             </h3>
 
             <p className="text-4xl mt-4 text-green-400 font-semibold">
-              12
+              {stats.assignments_created}
             </p>
 
           </div>
@@ -162,7 +210,7 @@ function TeacherDashboard() {
             </h3>
 
             <p className="text-4xl mt-4 text-purple-400 font-semibold">
-              24
+              {stats.notes_uploaded}
             </p>
 
           </div>
@@ -224,6 +272,7 @@ function TeacherDashboard() {
 
           {/* Students */}
           <div
+            onClick={() => navigate("/student-management")}
             className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 hover:border-purple-500 transition-all duration-300 cursor-pointer"
           >
 
