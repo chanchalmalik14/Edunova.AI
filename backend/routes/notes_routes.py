@@ -134,3 +134,43 @@ def download_note(filename: str):
         filename=filename,
         media_type='application/octet-stream'
     )
+
+
+@router.get("/get-teacher-notes")
+def get_teacher_notes(
+    user_data = Depends(verify_token)
+):
+    teacher_only(user_data)
+    notes = list(
+        notes_collection.find(
+            {"uploaded_by": user_data["email"]},
+            {"_id": 0}
+        )
+    )
+    return {
+        "notes": notes
+    }
+
+
+@router.delete("/delete-note/{filename}")
+def delete_note(
+    filename: str,
+    user_data = Depends(verify_token)
+):
+    teacher_only(user_data)
+    # Remove file from local disk
+    note = notes_collection.find_one(
+        {"filename": filename, "uploaded_by": user_data["email"]}
+    )
+    if note and os.path.exists(note["file_path"]):
+        try:
+            os.remove(note["file_path"])
+        except Exception as e:
+            print(f"Error removing file: {e}")
+
+    notes_collection.delete_one(
+        {"filename": filename, "uploaded_by": user_data["email"]}
+    )
+    return {
+        "message": "Note deleted successfully"
+    }

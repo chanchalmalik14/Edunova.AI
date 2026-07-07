@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, UploadFile, File, Form
+from fastapi.responses import FileResponse
 from typing import Optional
 from database.db import db
 from schemas.assignment_schema import AssignmentSchema
@@ -118,4 +119,46 @@ def view_submissions(
 
     return {
         "submissions": submissions
+    }
+
+
+@router.get("/get-teacher-assignments")
+def get_teacher_assignments(
+    user_data = Depends(verify_token)
+):
+    teacher_only(user_data)
+    assignments = list(
+        assignment_collection.find(
+            {"created_by": user_data["email"]},
+            {"_id": 0}
+        )
+    )
+    return {
+        "assignments": assignments
+    }
+
+
+@router.delete("/delete-assignment/{title}")
+def delete_assignment(
+    title: str,
+    user_data = Depends(verify_token)
+):
+    teacher_only(user_data)
+    assignment_collection.delete_one(
+        {"title": title, "created_by": user_data["email"]}
+    )
+    return {
+        "message": "Assignment deleted successfully"
+    }
+
+
+@router.get("/download-submission/{filename}")
+def download_submission(
+    filename: str
+):
+    file_path = f"assignment_submissions/{filename}"
+    if os.path.exists(file_path):
+        return FileResponse(file_path, filename=filename)
+    return {
+        "error": "Submission file not found"
     }

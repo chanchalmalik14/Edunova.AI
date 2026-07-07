@@ -133,3 +133,19 @@ def student_dashboard(
     return {
         "message": "Welcome Student"
     }
+
+
+@router.get("/get-students")
+def get_students(
+    user_data = Depends(verify_token)
+):
+    teacher_only(user_data)
+    students = list(
+        db["users"].find(
+            {"role": "student"},
+            {"_id": 0, "password": 0}
+        )
+    )
+    return {
+        "students": students
+    }
