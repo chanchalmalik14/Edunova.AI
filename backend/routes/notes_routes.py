@@ -96,39 +96,23 @@ def get_notes(
     return {
         "notes": notes
     }
-@router.get("/download-note/{filename}")
-def download_note(
-    filename: str,
+
+from pydantic import BaseModel
+
+class SummaryRequest(BaseModel):
+    text: str
+
+@router.post("/generate-summary")
+def generate_note_summary(
+    request: SummaryRequest,
     user_data = Depends(verify_token)
 ):
-
-    file_path = f"uploads/{filename}"
-
-    return FileResponse(
-        path=file_path,
-        filename=filename,
-        media_type='application/octet-stream'
-    )
-@router.post("/generate-summary")
-def generate_note_summary():
-
     try:
-
-        sample_text = """
-        Operating system manages
-        hardware and software resources.
-        It acts as an interface
-        between user and computer.
-        """
-
-        summary = generate_summary(sample_text)
-
+        summary = generate_summary(request.text)
         return {
             "summary": summary
         }
-
     except Exception as e:
-
         return {
             "error": str(e)
         }

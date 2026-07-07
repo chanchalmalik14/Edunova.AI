@@ -1,12 +1,9 @@
-from fastapi import APIRouter, Depends
-
+from fastapi import APIRouter, Depends, UploadFile, File, Form
+from typing import Optional
 from database.db import db
-
 from schemas.assignment_schema import AssignmentSchema
-
 from utils.auth_middleware import verify_token
 from utils.role_checker import teacher_only
-from fastapi import UploadFile, File
 import shutil
 import os
 router = APIRouter()
@@ -63,33 +60,38 @@ def get_assignments(
     }
 @router.post("/submit-assignment")
 def submit_assignment(
-    title: str,
-    file: UploadFile = File(...),
+    title: str = Form(...),
+    text_answer: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None),
     user_data = Depends(verify_token)
 ):
 
-    # Create uploads folder
-    os.makedirs(
-        "assignment_submissions",
-        exist_ok=True
-    )
+    file_path = None
+    filename = None
 
-    file_path = (
-        f"assignment_submissions/{file.filename}"
-    )
-
-    # Save file
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(
-            file.file,
-            buffer
+    if file:
+        # Create uploads folder
+        os.makedirs(
+            "assignment_submissions",
+            exist_ok=True
         )
+
+        file_path = f"assignment_submissions/{file.filename}"
+
+        # Save file
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(
+                file.file,
+                buffer
+            )
+        filename = file.filename
 
     submission_data = {
         "assignment_title": title,
         "student_email": user_data["email"],
+        "text_answer": text_answer,
         "file_path": file_path,
-        "filename": file.filename
+        "filename": filename
     }
 
     submission_collection.insert_one(

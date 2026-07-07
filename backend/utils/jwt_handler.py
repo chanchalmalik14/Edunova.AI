@@ -1,7 +1,12 @@
 from jose import jwt
+from jose.exceptions import JWTError
 from datetime import datetime, timedelta
+import os
+from dotenv import load_dotenv
 
-SECRET_KEY = "your_secret_key"
+load_dotenv()
+
+SECRET_KEY = os.getenv("SECRET_KEY", "your_secret_key")
 
 ALGORITHM = "HS256"
 
