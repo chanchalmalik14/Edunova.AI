@@ -8,7 +8,8 @@ import {
   FileText,
   BarChart3,
   Settings,
-  LogOut
+  LogOut,
+  Award
 } from "lucide-react";
 
 function Dashboard() {
@@ -108,6 +109,15 @@ function Dashboard() {
           >
             <FileText size={20} />
             <p>Assignments</p>
+          </div>
+
+          {/* Quizzes */}
+          <div
+            onClick={() => navigate("/quizzes")}
+            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+          >
+            <Award size={20} />
+            <p>Quizzes</p>
           </div>
 
           {/* Analytics (FIXED) */}

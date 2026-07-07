@@ -8,7 +8,9 @@ import RegisterPage from "./pages/RegisterPage";
 
 import Dashboard from "./pages/Dashboard";
 import AINotesPage from "./pages/AINotesPage";
-
+import QuizPage from "./pages/QuizPage";
+import QuizzesList from "./pages/QuizzesList";
+import TeacherQuizzes from "./pages/TeacherQuizzes";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 
@@ -165,6 +167,30 @@ function App() {
       element={
         <ProtectedRoute>
           <StudentManagement />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/quizzes"
+      element={
+        <ProtectedRoute>
+          <QuizzesList />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/quiz/:id"
+      element={
+        <ProtectedRoute>
+          <QuizPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/teacher-quizzes"
+      element={
+        <ProtectedRoute>
+          <TeacherQuizzes />
         </ProtectedRoute>
       }
     />

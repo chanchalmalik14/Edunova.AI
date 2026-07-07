@@ -1,127 +1,173 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { FileText, HelpCircle, CheckCircle, AlertTriangle } from "lucide-react";
 
 function QuizPage() {
-
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const questions = [
-    {
-      question: "What is 2 + 2?",
-      options: ["2", "3", "4", "5"],
-      answer: "4"
-    },
-    {
-      question: "Capital of India?",
-      options: ["Mumbai", "Delhi", "Kolkata", "Chennai"],
-      answer: "Delhi"
-    },
-    {
-      question: "React is a?",
-      options: ["Library", "Framework", "Language", "Database"],
-      answer: "Library"
-    }
-  ];
-
+  const [loading, setLoading] = useState(true);
+  const [quiz, setQuiz] = useState(null);
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
+  const [answers, setAnswers] = useState([]);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleAnswer = (option) => {
+  // Fetch Quiz details from backend matching title ID
+  useEffect(() => {
+    const fetchQuiz = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://127.0.0.1:8000/get-quizzes", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        if (response.ok && data.quizzes) {
+          const found = data.quizzes.find((q) => q.title === decodeURIComponent(id));
+          if (found) {
+            setQuiz(found);
+          }
+        }
+      } catch (err) {
+        console.error("Error loading quiz details:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQuiz();
+  }, [id]);
 
-    let newScore = score;
+  const handleAnswerSelect = async (selectedOption) => {
+    const nextAnswers = [...answers, selectedOption];
+    setAnswers(nextAnswers);
 
-    if (option === questions[current].answer) {
-      newScore = score + 1;
-      setScore(newScore);
-    }
+    const questionsLength = quiz.questions?.length || 0;
 
-    if (current + 1 < questions.length) {
+    if (current + 1 < questionsLength) {
       setCurrent(current + 1);
     } else {
-      setShowResult(true);
+      // End of Quiz: Submit answers to backend
+      setSubmitting(true);
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://127.0.0.1:8000/submit-quiz", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            title: quiz.title,
+            answers: nextAnswers
+          })
+        });
 
-      // ✅ SAVE RESULT FOR DASHBOARD
-      localStorage.setItem("lastScore", newScore);
-      localStorage.setItem("totalQuestions", questions.length);
+        const data = await response.json();
+        if (response.ok && data.score !== undefined) {
+          setScore(data.score);
+        } else {
+          alert(data.error || "Failed to save score");
+        }
+      } catch (err) {
+        console.error("Error submitting quiz results:", err);
+      } finally {
+        setSubmitting(false);
+        setShowResult(true);
+      }
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-950 text-white p-8">
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-950 text-white p-8 flex items-center justify-center">
+        <p className="text-xl text-gray-400">Loading quiz details...</p>
+      </div>
+    );
+  }
 
-      {/* Header */}
-      <div className="flex justify-between items-center">
-
-        <h1 className="text-2xl">
-          🧠 Quiz - <span className="text-blue-400">{id}</span>
-        </h1>
-
-        <button
-          onClick={() => navigate(-1)}
-          className="bg-white/10 px-4 py-2 rounded-xl"
-        >
+  if (!quiz) {
+    return (
+      <div className="min-h-screen bg-gray-950 text-white p-8 flex flex-col items-center justify-center gap-4">
+        <AlertTriangle className="text-yellow-500" size={50} />
+        <h2 className="text-3xl font-light">Quiz Not Found</h2>
+        <button onClick={() => navigate(-1)} className="bg-white/10 px-6 py-3 rounded-xl transition hover:bg-white/20">
           Back
         </button>
+      </div>
+    );
+  }
 
+  const questions = quiz.questions || [];
+  const currentQuestion = questions[current];
+
+  return (
+    <div className="min-h-screen bg-gray-950 text-white p-8 flex flex-col justify-between">
+      {/* Top Header */}
+      <div className="flex justify-between items-center max-w-xl mx-auto w-full">
+        <h1 className="text-2xl font-light">
+          🧠 Quiz: <span className="text-blue-400">{quiz.title}</span>
+        </h1>
+        <button
+          onClick={() => navigate(-1)}
+          className="bg-white/10 hover:bg-white/20 transition px-5 py-2.5 rounded-xl text-sm"
+        >
+          Quit
+        </button>
       </div>
 
       {/* Quiz Box */}
-      <div className="mt-10 max-w-xl mx-auto bg-white/5 border border-white/10 p-6 rounded-2xl">
-
+      <div className="mt-8 max-w-xl mx-auto bg-white/[0.03] border border-white/10 p-8 rounded-3xl w-full">
         {!showResult ? (
-          <>
-            <h2 className="text-xl mb-6">
-              {questions[current].question}
-            </h2>
+          currentQuestion && (
+            <div className="space-y-6">
+              <h2 className="text-xl font-medium text-gray-200">
+                {currentQuestion.question}
+              </h2>
 
-            <div className="grid gap-4">
+              <div className="grid gap-4">
+                {currentQuestion.options?.map((opt, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleAnswerSelect(opt)}
+                    className="bg-white/5 border border-white/5 hover:border-blue-500/50 hover:bg-blue-500/10 transition px-6 py-4 rounded-2xl text-left text-sm font-medium"
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
 
-              {questions[current].options.map((opt, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleAnswer(opt)}
-                  className="bg-white/10 hover:bg-white/20 transition px-4 py-2 rounded-xl"
-                >
-                  {opt}
-                </button>
-              ))}
-
+              <div className="pt-4 border-t border-white/5 flex justify-between text-xs text-gray-500">
+                <span>Question {current + 1} of {questions.length}</span>
+              </div>
+            </div>
+          )
+        ) : (
+          <div className="text-center py-6 space-y-6">
+            <CheckCircle className="text-green-400 mx-auto" size={60} />
+            
+            <div>
+              <h2 className="text-3xl font-light">Quiz Completed!</h2>
+              <p className="text-gray-400 text-sm mt-1">Your responses were successfully submitted to MongoDB.</p>
             </div>
 
-            <p className="mt-6 text-gray-400">
-              Question {current + 1} of {questions.length}
-            </p>
-
-          </>
-        ) : (
-          <div className="text-center">
-
-            <h2 className="text-3xl mb-4">
-              Quiz Completed 🎉
-            </h2>
-
-            <p className="text-xl text-blue-400">
-              Score: {score} / {questions.length}
+            <p className="text-2xl text-gray-200">
+              Your Score: <span className="text-blue-400 font-semibold">{score}</span> / {questions.length}
             </p>
 
             <button
-              onClick={() => {
-                setCurrent(0);
-                setScore(0);
-                setShowResult(false);
-              }}
-              className="mt-6 bg-blue-500 px-6 py-2 rounded-xl"
+              onClick={() => navigate("/quizzes")}
+              className="bg-blue-500 hover:bg-blue-600 transition px-8 py-3.5 rounded-2xl font-semibold w-full mt-4"
             >
-              Restart Quiz
+              Back to Quizzes
             </button>
-
           </div>
         )}
-
       </div>
 
+      <div />
     </div>
   );
 }

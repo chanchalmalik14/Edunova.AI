@@ -9,7 +9,8 @@ import {
   Users,
   LogOut,
   BookOpen,
-  BarChart3
+  BarChart3,
+  Award
 } from "lucide-react";
 
 function TeacherDashboard() {
@@ -106,6 +107,15 @@ function TeacherDashboard() {
           >
             <FileText size={20} />
             <p>Assignments</p>
+          </div>
+
+          {/* Quizzes */}
+          <div
+            onClick={() => navigate("/teacher-quizzes")}
+            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+          >
+            <Award size={20} />
+            <p>Quizzes</p>
           </div>
 
           {/* Students */}
@@ -218,81 +228,82 @@ function TeacherDashboard() {
         </div>
 
         {/* FEATURE CARDS */}
-        <div className="grid md:grid-cols-3 gap-8 mt-14">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-14">
 
           {/* Upload Notes */}
           <div
             onClick={() => navigate("/upload-notes")}
-            className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 hover:border-blue-500 transition-all duration-300 cursor-pointer"
+            className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 hover:border-blue-500 transition-all duration-300 cursor-pointer flex flex-col justify-between"
           >
-
-            <div className="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center">
-
-              <Upload
-                className="text-blue-400"
-                size={30}
-              />
-
+            <div>
+              <div className="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+                <Upload
+                  className="text-blue-400"
+                  size={30}
+                />
+              </div>
+              <h2 className="text-2xl mt-6">Upload Notes</h2>
+              <p className="text-gray-400 mt-3 text-sm">
+                Upload study material and PDFs for students.
+              </p>
             </div>
-
-            <h2 className="text-2xl mt-6">
-              Upload Notes
-            </h2>
-
-            <p className="text-gray-400 mt-3">
-              Upload study material and PDFs for students.
-            </p>
-
           </div>
 
           {/* Assignments */}
           <div
             onClick={() => navigate("/teacher-assignments")}
-            className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 hover:border-green-500 transition-all duration-300 cursor-pointer"
+            className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 hover:border-green-500 transition-all duration-300 cursor-pointer flex flex-col justify-between"
           >
-
-            <div className="w-16 h-16 rounded-2xl bg-green-500/10 flex items-center justify-center">
-
-              <FileText
-                className="text-green-400"
-                size={30}
-              />
-
+            <div>
+              <div className="w-16 h-16 rounded-2xl bg-green-500/10 flex items-center justify-center">
+                <FileText
+                  className="text-green-400"
+                  size={30}
+                />
+              </div>
+              <h2 className="text-2xl mt-6">Assignments</h2>
+              <p className="text-gray-400 mt-3 text-sm">
+                Create and manage assignments for students.
+              </p>
             </div>
+          </div>
 
-            <h2 className="text-2xl mt-6">
-              Assignments
-            </h2>
-
-            <p className="text-gray-400 mt-3">
-              Create and manage assignments for students.
-            </p>
-
+          {/* Quizzes */}
+          <div
+            onClick={() => navigate("/teacher-quizzes")}
+            className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 hover:border-yellow-500 transition-all duration-300 cursor-pointer flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center">
+                <Award
+                  className="text-yellow-400"
+                  size={30}
+                />
+              </div>
+              <h2 className="text-2xl mt-6">Quizzes</h2>
+              <p className="text-gray-400 mt-3 text-sm">
+                Create custom quizzes or generate automatically with Gemini AI.
+              </p>
+            </div>
           </div>
 
           {/* Students */}
           <div
             onClick={() => navigate("/student-management")}
-            className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 hover:border-purple-500 transition-all duration-300 cursor-pointer"
+            className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 hover:border-purple-500 transition-all duration-300 cursor-pointer flex flex-col justify-between"
           >
-
-            <div className="w-16 h-16 rounded-2xl bg-purple-500/10 flex items-center justify-center">
-
-              <Users
-                className="text-purple-400"
-                size={30}
-              />
-
+            <div>
+              <div className="w-16 h-16 rounded-2xl bg-purple-500/10 flex items-center justify-center">
+                <Users
+                  className="text-purple-400"
+                  size={30}
+                />
+              </div>
+              <h2 className="text-2xl mt-6">Students</h2>
+              <p className="text-gray-400 mt-3 text-sm">
+                Manage student listings and grade homework uploads.
+              </p>
             </div>
-
-            <h2 className="text-2xl mt-6">
-              Students
-            </h2>
-
-            <p className="text-gray-400 mt-3">
-              Manage and track student performance.
-            </p>
-
           </div>
 
         </div>
