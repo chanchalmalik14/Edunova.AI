@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LayoutDashboard, Brain, BookOpen, FileText, BarChart3, Settings, LogOut, Award, ChevronRight } from "lucide-react";
+import { LayoutDashboard, Brain, BookOpen, FileText, BarChart3, Settings, LogOut, Award, ChevronRight, CheckCircle } from "lucide-react";
 
 function QuizzesList() {
   const navigate = useNavigate();
