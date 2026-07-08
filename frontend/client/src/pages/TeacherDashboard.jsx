@@ -10,7 +10,8 @@ import {
   LogOut,
   BookOpen,
   BarChart3,
-  Award
+  Award,
+  Settings
 } from "lucide-react";
 
 function TeacherDashboard() {
@@ -125,6 +126,15 @@ function TeacherDashboard() {
           >
             <Users size={20} />
             <p>Students</p>
+          </div>
+
+          {/* Settings */}
+          <div
+            onClick={() => navigate("/teacher-settings")}
+            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+          >
+            <Settings size={20} />
+            <p>Settings</p>
           </div>
 
         </div>

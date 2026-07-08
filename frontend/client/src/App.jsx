@@ -11,6 +11,7 @@ import AINotesPage from "./pages/AINotesPage";
 import QuizPage from "./pages/QuizPage";
 import QuizzesList from "./pages/QuizzesList";
 import TeacherQuizzes from "./pages/TeacherQuizzes";
+import TeacherSettingsPage from "./pages/TeacherSettingsPage";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 
@@ -191,6 +192,14 @@ function App() {
       element={
         <ProtectedRoute>
           <TeacherQuizzes />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/teacher-settings"
+      element={
+        <ProtectedRoute>
+          <TeacherSettingsPage />
         </ProtectedRoute>
       }
     />
