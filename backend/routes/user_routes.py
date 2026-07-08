@@ -1,8 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from schemas.user_schema import UserSchema
 from schemas.login_schema import LoginSchema
 from utils.jwt_handler import create_access_token
-from fastapi import Depends
 from utils.auth_middleware import verify_token
 from fastapi.security import OAuth2PasswordRequestForm
 from database.db import db
@@ -148,4 +148,59 @@ def get_students(
     )
     return {
         "students": students
+    }
+
+
+class UpdateProfileRequest(BaseModel):
+    name: str
+    className: str
+    section: str
+    email: str
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
+@router.put("/update-profile")
+def update_profile(
+    request: UpdateProfileRequest,
+    user_data = Depends(verify_token)
+):
+    email = user_data["email"]
+    db["users"].update_one(
+        {"email": email},
+        {"$set": {
+            "full_name": request.name,
+            "student_class": request.className,
+            "section": request.section,
+            "email": request.email
+        }}
+    )
+    return {
+        "message": "Profile updated successfully"
+    }
+
+
+@router.post("/change-password")
+def change_password(
+    request: ChangePasswordRequest,
+    user_data = Depends(verify_token)
+):
+    email = user_data["email"]
+    user = db["users"].find_one({"email": email})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not verify_password(request.current_password, user["password"]):
+        raise HTTPException(status_code=400, detail="Invalid current password")
+
+    hashed_pw = hash_password(request.new_password)
+    db["users"].update_one(
+        {"email": email},
+        {"$set": {"password": hashed_pw}}
+    )
+    return {
+        "message": "Password updated successfully"
     }
