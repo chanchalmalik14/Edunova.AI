@@ -42,8 +42,9 @@ def get_analytics(user_data = Depends(verify_token)):
         }
 
     elif role == "teacher":
-        # 1. Total Students in the database
-        total_students = db["users"].count_documents({"role": "student"})
+        school = user_data.get("school_name", "")
+        # 1. Total Students in the teacher's school
+        total_students = db["users"].count_documents({"role": "student", "school_name": school})
 
         # 2. Assignments Created by this teacher
         assignments_created = db["assignments"].count_documents({"created_by": email})

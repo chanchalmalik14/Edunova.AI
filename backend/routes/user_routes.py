@@ -140,9 +140,10 @@ def get_students(
     user_data = Depends(verify_token)
 ):
     teacher_only(user_data)
+    school = user_data.get("school_name", "")
     students = list(
         db["users"].find(
-            {"role": "student"},
+            {"role": "student", "school_name": school},
             {"_id": 0, "password": 0}
         )
     )
