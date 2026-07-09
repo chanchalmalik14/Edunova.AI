@@ -11,7 +11,8 @@ import {
   BookOpen,
   BarChart3,
   Award,
-  Settings
+  Settings,
+  Calendar
 } from "lucide-react";
 
 function TeacherDashboard() {
@@ -128,6 +129,15 @@ function TeacherDashboard() {
             <p>Students</p>
           </div>
 
+          {/* Attendance */}
+          <div
+            onClick={() => navigate("/teacher-attendance")}
+            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+          >
+            <Calendar size={20} />
+            <p>Attendance</p>
+          </div>
+
           {/* Settings */}
           <div
             onClick={() => navigate("/teacher-settings")}
@@ -238,7 +248,7 @@ function TeacherDashboard() {
         </div>
 
         {/* FEATURE CARDS */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-14">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 mt-14">
 
           {/* Upload Notes */}
           <div
@@ -312,6 +322,25 @@ function TeacherDashboard() {
               <h2 className="text-2xl mt-6">Students</h2>
               <p className="text-gray-400 mt-3 text-sm">
                 Manage student listings and grade homework uploads.
+              </p>
+            </div>
+          </div>
+
+          {/* Attendance */}
+          <div
+            onClick={() => navigate("/teacher-attendance")}
+            className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 hover:border-red-500 transition-all duration-300 cursor-pointer flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center">
+                <Calendar
+                  className="text-red-400"
+                  size={30}
+                />
+              </div>
+              <h2 className="text-2xl mt-6">Attendance</h2>
+              <p className="text-gray-400 mt-3 text-sm">
+                Mark daily attendance and check historical logs.
               </p>
             </div>
           </div>

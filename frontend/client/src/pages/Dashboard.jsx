@@ -9,7 +9,8 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Award
+  Award,
+  Calendar
 } from "lucide-react";
 
 function Dashboard() {
@@ -120,6 +121,15 @@ function Dashboard() {
             <p>Quizzes</p>
           </div>
 
+          {/* Attendance */}
+          <div
+            onClick={() => navigate("/attendance")}
+            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+          >
+            <Calendar size={20} />
+            <p>Attendance</p>
+          </div>
+
           {/* Analytics (FIXED) */}
           <div
             onClick={() => navigate("/analytics")}
@@ -203,7 +213,7 @@ function Dashboard() {
         </div>
 
         {/* Main Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mt-14">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-14">
 
           <div
             onClick={() => navigate("/ai-notes")}
@@ -212,9 +222,8 @@ function Dashboard() {
             <div className="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center">
               <Brain className="text-blue-400" size={30} />
             </div>
-
             <h2 className="text-2xl mt-6">AI Workspace</h2>
-            <p className="text-gray-400 mt-3">
+            <p className="text-gray-400 mt-3 text-sm">
               Generate notes and learn anything instantly.
             </p>
           </div>
@@ -226,9 +235,8 @@ function Dashboard() {
             <div className="w-16 h-16 rounded-2xl bg-green-500/10 flex items-center justify-center">
               <BookOpen className="text-green-400" size={30} />
             </div>
-
             <h2 className="text-2xl mt-6">Notes Library</h2>
-            <p className="text-gray-400 mt-3">
+            <p className="text-gray-400 mt-3 text-sm">
               Access notes uploaded by teachers.
             </p>
           </div>
@@ -240,10 +248,35 @@ function Dashboard() {
             <div className="w-16 h-16 rounded-2xl bg-purple-500/10 flex items-center justify-center">
               <FileText className="text-purple-400" size={30} />
             </div>
-
             <h2 className="text-2xl mt-6">Assignments</h2>
-            <p className="text-gray-400 mt-3">
-              View and submit assignments.
+            <p className="text-gray-400 mt-3 text-sm">
+              View and submit classroom assignments.
+            </p>
+          </div>
+
+          <div
+            onClick={() => navigate("/quizzes")}
+            className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 hover:border-yellow-500 transition-all duration-300 cursor-pointer"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center">
+              <Award className="text-yellow-400" size={30} />
+            </div>
+            <h2 className="text-2xl mt-6">Quizzes</h2>
+            <p className="text-gray-400 mt-3 text-sm">
+              Test your knowledge and practice your concepts.
+            </p>
+          </div>
+
+          <div
+            onClick={() => navigate("/attendance")}
+            className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 hover:border-red-500 transition-all duration-300 cursor-pointer"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center">
+              <Calendar className="text-red-400" size={30} />
+            </div>
+            <h2 className="text-2xl mt-6">My Attendance</h2>
+            <p className="text-gray-400 mt-3 text-sm">
+              Track your daily present/absent logs.
             </p>
           </div>
 

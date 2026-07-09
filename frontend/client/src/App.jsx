@@ -16,6 +16,8 @@ import TeacherDashboard from "./pages/TeacherDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 
 import UploadNotesPage from "./pages/UploadNotesPage";
+import TeacherAttendance from "./pages/TeacherAttendance";
+import StudentAttendance from "./pages/StudentAttendance";
 
 import AssignmentPage from "./pages/AssignmentPage";
 
@@ -200,6 +202,22 @@ function App() {
       element={
         <ProtectedRoute>
           <TeacherSettingsPage />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/teacher-attendance"
+      element={
+        <ProtectedRoute>
+          <TeacherAttendance />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/attendance"
+      element={
+        <ProtectedRoute>
+          <StudentAttendance />
         </ProtectedRoute>
       }
     />

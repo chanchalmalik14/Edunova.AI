@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LayoutDashboard, Brain, BookOpen, FileText, BarChart3, Settings, LogOut, Award, ChevronRight, CheckCircle } from "lucide-react";
+import { LayoutDashboard, Brain, BookOpen, FileText, BarChart3, Settings, LogOut, Award, ChevronRight, CheckCircle, Calendar } from "lucide-react";
 
 function QuizzesList() {
   const navigate = useNavigate();
@@ -91,6 +91,14 @@ function QuizzesList() {
           >
             <Award size={20} className="text-blue-400" />
             <p>Quizzes</p>
+          </div>
+          {/* Attendance */}
+          <div
+            onClick={() => navigate("/attendance")}
+            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+          >
+            <Calendar size={20} />
+            <p>Attendance</p>
           </div>
           <div
             onClick={() => navigate("/analytics")}
