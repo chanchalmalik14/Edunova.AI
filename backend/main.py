@@ -8,6 +8,7 @@ from routes.quiz_routes import router as quiz_router
 from routes.assignment_routes import router as assignment_router
 from routes.analytics_routes import router as analytics_router
 from routes.attendance_routes import router as attendance_router
+from routes.admin_routes import router as admin_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -26,6 +27,7 @@ app.include_router(quiz_router)
 app.include_router(assignment_router)
 app.include_router(analytics_router)
 app.include_router(attendance_router)
+app.include_router(admin_router)
 
 
 @app.get("/")
