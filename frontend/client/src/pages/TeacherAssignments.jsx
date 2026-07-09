@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Plus, Trash2, Calendar, BookOpen, GraduationCap, Upload, Users, LayoutDashboard, LogOut } from "lucide-react";
+import { FileText, Plus, Trash2, Calendar, BookOpen, GraduationCap, Upload, Users, LayoutDashboard, LogOut, Award, Settings } from "lucide-react";
 
 function TeacherAssignments() {
   const navigate = useNavigate();

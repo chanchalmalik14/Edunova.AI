@@ -6,7 +6,9 @@ import {
   Trash2,
   LayoutDashboard,
   Users,
-  LogOut
+  LogOut,
+  Award,
+  Settings
 } from "lucide-react";
 
 function UploadNotesPage() {

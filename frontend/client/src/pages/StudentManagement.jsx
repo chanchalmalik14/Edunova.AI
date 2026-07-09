@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, GraduationCap, Mail, School, FileText, Download, CheckCircle, Upload, LayoutDashboard, LogOut } from "lucide-react";
+import { Users, GraduationCap, Mail, School, FileText, Download, CheckCircle, Upload, LayoutDashboard, LogOut, Award, Settings } from "lucide-react";
 
 function StudentManagement() {
   const navigate = useNavigate();
