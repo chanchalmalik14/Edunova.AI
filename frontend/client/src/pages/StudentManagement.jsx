@@ -80,11 +80,25 @@ function StudentManagement() {
             <p>Assignments</p>
           </div>
           <div
+            onClick={() => navigate("/teacher-quizzes")}
+            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+          >
+            <Award size={20} />
+            <p>Quizzes</p>
+          </div>
+          <div
             onClick={() => navigate("/student-management")}
             className="flex items-center gap-3 bg-white/5 p-3 rounded-xl text-white cursor-pointer hover:bg-white/10 transition"
           >
             <Users size={20} />
             <p>Students</p>
+          </div>
+          <div
+            onClick={() => navigate("/teacher-settings")}
+            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+          >
+            <Settings size={20} />
+            <p>Settings</p>
           </div>
         </div>
         <button

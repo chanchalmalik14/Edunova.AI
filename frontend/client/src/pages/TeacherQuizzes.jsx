@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LayoutDashboard, Upload, FileText, Users, LogOut, Brain, Plus, Trash2, CheckCircle, HelpCircle } from "lucide-react";
+import { LayoutDashboard, Upload, FileText, Users, LogOut, Brain, Plus, Trash2, CheckCircle, HelpCircle, Award, Settings } from "lucide-react";
 
 function TeacherQuizzes() {
   const navigate = useNavigate();
@@ -214,11 +214,25 @@ function TeacherQuizzes() {
             <p>Assignments</p>
           </div>
           <div
+            onClick={() => navigate("/teacher-quizzes")}
+            className="flex items-center gap-3 bg-white/5 p-3 rounded-xl text-white cursor-pointer hover:bg-white/10 transition"
+          >
+            <Award size={20} />
+            <p>Quizzes</p>
+          </div>
+          <div
             onClick={() => navigate("/student-management")}
             className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
           >
             <Users size={20} />
             <p>Students</p>
+          </div>
+          <div
+            onClick={() => navigate("/teacher-settings")}
+            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+          >
+            <Settings size={20} />
+            <p>Settings</p>
           </div>
         </div>
         <button
