@@ -171,10 +171,9 @@ function QuizzesList() {
 
                   <button
                     onClick={() => navigate(`/quiz/${encodeURIComponent(quiz.title)}`)}
-                    disabled={hasTaken}
                     className={`px-5 py-3 rounded-2xl flex items-center gap-1.5 font-semibold text-sm transition ${
                       hasTaken
-                        ? "bg-white/5 border border-white/10 text-gray-500 cursor-not-allowed"
+                        ? "bg-white/10 hover:bg-white/20 border border-white/10 text-white cursor-pointer"
                         : "bg-blue-500 hover:bg-blue-600 text-white"
                     }`}
                   >

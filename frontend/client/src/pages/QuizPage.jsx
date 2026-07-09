@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FileText, HelpCircle, CheckCircle, AlertTriangle } from "lucide-react";
+import { FileText, HelpCircle, CheckCircle, AlertTriangle, Calendar } from "lucide-react";
 
 function QuizPage() {
   const { id } = useParams();
@@ -14,11 +14,18 @@ function QuizPage() {
   const [answers, setAnswers] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
-  // Fetch Quiz details from backend matching title ID
+  // Completed check states
+  const [hasResult, setHasResult] = useState(false);
+  const [pastResult, setPastResult] = useState(null);
+
+  // Fetch Quiz details and student score results
   useEffect(() => {
-    const fetchQuiz = async () => {
+    const fetchQuizAndResult = async () => {
       try {
         const token = localStorage.getItem("token");
+        const decodedId = decodeURIComponent(id);
+
+        // 1. Fetch Quiz details
         const response = await fetch("http://127.0.0.1:8000/get-quizzes", {
           headers: {
             Authorization: `Bearer ${token}`
@@ -26,18 +33,33 @@ function QuizPage() {
         });
         const data = await response.json();
         if (response.ok && data.quizzes) {
-          const found = data.quizzes.find((q) => q.title === decodeURIComponent(id));
+          const found = data.quizzes.find((q) => q.title === decodedId);
           if (found) {
             setQuiz(found);
           }
         }
+
+        // 2. Fetch past scores to check if already completed
+        const resResults = await fetch("http://127.0.0.1:8000/get-student-results", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        const dataResults = await resResults.json();
+        if (resResults.ok && dataResults.results) {
+          const matchedResult = dataResults.results.find((r) => r.quiz_title === decodedId);
+          if (matchedResult) {
+            setHasResult(true);
+            setPastResult(matchedResult);
+          }
+        }
       } catch (err) {
-        console.error("Error loading quiz details:", err);
+        console.error("Error loading quiz details & results:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchQuiz();
+    fetchQuizAndResult();
   }, [id]);
 
   const handleAnswerSelect = async (selectedOption) => {
@@ -106,7 +128,7 @@ function QuizPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-white p-8 flex flex-col justify-between">
       {/* Top Header */}
-      <div className="flex justify-between items-center max-w-xl mx-auto w-full">
+      <div className="flex justify-between items-center max-w-2xl mx-auto w-full">
         <h1 className="text-2xl font-light">
           🧠 Quiz: <span className="text-blue-400">{quiz.title}</span>
         </h1>
@@ -119,8 +141,57 @@ function QuizPage() {
       </div>
 
       {/* Quiz Box */}
-      <div className="mt-8 max-w-xl mx-auto bg-white/[0.03] border border-white/10 p-8 rounded-3xl w-full">
-        {!showResult ? (
+      <div className="mt-8 max-w-2xl mx-auto bg-white/[0.03] border border-white/10 p-8 rounded-3xl w-full">
+        {hasResult ? (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center border-b border-white/10 pb-4">
+              <div>
+                <h2 className="text-3xl font-light text-green-400">Quiz Completed!</h2>
+                <p className="text-gray-400 text-sm mt-1">Review the questions and correct answers below.</p>
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-bold text-blue-400">
+                  {pastResult?.score} / {pastResult?.total_questions}
+                </p>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mt-1 font-semibold">Your Score</p>
+              </div>
+            </div>
+
+            <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2 mt-6">
+              {questions.map((q, qIdx) => (
+                <div key={qIdx} className="bg-white/5 border border-white/5 rounded-2xl p-5 space-y-3">
+                  <p className="text-lg font-medium text-gray-200">
+                    Q{qIdx + 1}: {q.question}
+                  </p>
+                  <div className="grid md:grid-cols-2 gap-3 pl-2">
+                    {q.options?.map((opt, oIdx) => {
+                      const isCorrect = opt === q.correct_answer;
+                      return (
+                        <div
+                          key={oIdx}
+                          className={`p-3.5 rounded-xl border text-sm transition font-medium ${
+                            isCorrect
+                              ? "border-green-500/40 bg-green-500/10 text-green-400"
+                              : "border-white/5 bg-white/[0.01] text-gray-400"
+                          }`}
+                        >
+                          {opt} {isCorrect && "✓ (Correct Answer)"}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => navigate("/quizzes")}
+              className="bg-blue-500 hover:bg-blue-600 transition px-8 py-3.5 rounded-2xl font-semibold w-full mt-4"
+            >
+              Back to Quizzes
+            </button>
+          </div>
+        ) : !showResult ? (
           currentQuestion && (
             <div className="space-y-6">
               <h2 className="text-xl font-medium text-gray-200">
