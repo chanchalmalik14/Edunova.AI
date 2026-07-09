@@ -109,10 +109,18 @@ def view_submissions(
 
     # Teacher only access
     teacher_only(user_data)
+    school = user_data.get("school_name", "")
+
+    # Get student emails from the same school
+    school_students = db["users"].find(
+        {"role": "student", "school_name": school},
+        {"email": 1}
+    )
+    student_emails = [s["email"] for s in school_students]
 
     submissions = list(
         submission_collection.find(
-            {},
+            {"student_email": {"$in": student_emails}},
             {"_id": 0}
         )
     )
