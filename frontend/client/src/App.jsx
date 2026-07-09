@@ -161,7 +161,7 @@ function App() {
   path="/teacher-management"
   element={
     <ProtectedRoute>
-      <TeacherManagement />
+      <AdminDashboard />
     </ProtectedRoute>
   }
 />
