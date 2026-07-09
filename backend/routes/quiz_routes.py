@@ -117,6 +117,24 @@ def view_results(
     return {
         "results": results
     }
+
+
+@router.get("/get-student-results")
+def get_student_results(
+    user_data = Depends(verify_token)
+):
+    email = user_data["email"]
+    results = list(
+        result_collection.find(
+            {"student_email": email},
+            {"_id": 0}
+        )
+    )
+    return {
+        "results": results
+    }
+
+
 class QuizGenerationRequest(BaseModel):
     text: str
 
