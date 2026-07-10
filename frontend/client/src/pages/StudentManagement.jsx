@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, GraduationCap, Mail, School, FileText, Download, CheckCircle, Upload, LayoutDashboard, LogOut, Award, Settings } from "lucide-react";
+import { Users, GraduationCap, Mail, School, FileText, Download, CheckCircle, Upload, LayoutDashboard, LogOut, Award, Settings, Calendar } from "lucide-react";
 
 function StudentManagement() {
   const navigate = useNavigate();
@@ -92,6 +92,13 @@ function StudentManagement() {
           >
             <Users size={20} />
             <p>Students</p>
+          </div>
+          <div
+            onClick={() => navigate("/teacher-attendance")}
+            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+          >
+            <Calendar size={20} />
+            <p>Attendance</p>
           </div>
           <div
             onClick={() => navigate("/teacher-settings")}

@@ -150,6 +150,13 @@ function TeacherAssignments() {
             <p>Students</p>
           </div>
           <div
+            onClick={() => navigate("/teacher-attendance")}
+            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+          >
+            <Calendar size={20} />
+            <p>Attendance</p>
+          </div>
+          <div
             onClick={() => navigate("/teacher-settings")}
             className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
           >

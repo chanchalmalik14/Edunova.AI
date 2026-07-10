@@ -8,7 +8,8 @@ import {
   Users,
   LogOut,
   Award,
-  Settings
+  Settings,
+  Calendar
 } from "lucide-react";
 
 function UploadNotesPage() {
@@ -162,6 +163,13 @@ function UploadNotesPage() {
           >
             <Users size={20} />
             <p>Students</p>
+          </div>
+          <div
+            onClick={() => navigate("/teacher-attendance")}
+            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+          >
+            <Calendar size={20} />
+            <p>Attendance</p>
           </div>
           <div
             onClick={() => navigate("/teacher-settings")}
