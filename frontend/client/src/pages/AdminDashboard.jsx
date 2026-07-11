@@ -699,9 +699,11 @@ function AdminDashboard() {
                     <option value="admin" className="bg-gray-900">Admin</option>
                   </select>
                 </div>
-                {userForm.role === "student" && (
+                {userForm.role !== "admin" && (
                   <div>
-                    <label className="block mb-2 text-sm text-gray-400">Assign Class</label>
+                    <label className="block mb-2 text-sm text-gray-400">
+                      Assign Class {userForm.role === "teacher" ? "(Teacher's class)" : ""}
+                    </label>
                     <select
                       value={userForm.student_class}
                       onChange={(e) => setUserForm({ ...userForm, student_class: e.target.value })}
@@ -715,6 +717,7 @@ function AdminDashboard() {
                     </select>
                   </div>
                 )}
+
               </div>
               <button type="submit" className="bg-blue-500 hover:bg-blue-600 transition px-8 py-3.5 rounded-2xl font-semibold flex items-center gap-2">
                 <UserPlus size={18} /> Add Account
