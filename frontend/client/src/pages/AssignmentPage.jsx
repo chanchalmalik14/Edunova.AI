@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { FileText, Upload, CheckCircle, Image, Type } from "lucide-react";
 
 function AssignmentPage() {
 
-  // 📌 Teacher-created assignments
+  // ðŸ“Œ Teacher-created assignments
   const [assignments, setAssignments] = useState([]);
 
-  // 📌 Student submissions
+  // ðŸ“Œ Student submissions
   const [submitted, setSubmitted] = useState(
     JSON.parse(localStorage.getItem("submittedAssignments")) || {}
   );
@@ -15,7 +15,7 @@ function AssignmentPage() {
   const [textAnswers, setTextAnswers] = useState({});
   const [mode, setMode] = useState({});
 
-  // 🔥 LOAD TEACHER ASSIGNMENTS FROM LOCALSTORAGE
+  // ðŸ”¥ LOAD TEACHER ASSIGNMENTS FROM LOCALSTORAGE
   useEffect(() => {
 
     const stored =
@@ -46,7 +46,7 @@ function AssignmentPage() {
     const hasImage = files[title];
 
     if (!hasText && !hasImage) {
-      alert("Please write answer or upload image 📌");
+      alert("Please write answer or upload image ðŸ“Œ");
       return;
     }
 
@@ -93,7 +93,7 @@ function AssignmentPage() {
           JSON.stringify(updated)
         );
 
-        alert("Assignment Submitted 🚀");
+        alert("Assignment Submitted ðŸš€");
       } else {
         alert(data.message || "Failed to submit assignment");
       }
@@ -113,7 +113,7 @@ function AssignmentPage() {
       </h1>
 
       <p className="text-gray-400 mt-2">
-        Teacher assigned tasks — submit your work
+        Teacher assigned tasks â€” submit your work
       </p>
 
       <div className="mt-10 space-y-6">
@@ -121,7 +121,7 @@ function AssignmentPage() {
         {/* IF NO ASSIGNMENTS */}
         {assignments.length === 0 && (
           <div className="text-center text-gray-500 mt-20">
-            No assignments uploaded by teacher yet 📭
+            No assignments uploaded by teacher yet ðŸ“­
           </div>
         )}
 

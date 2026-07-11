@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -14,11 +14,15 @@ import {
   LogOut,
   Award,
   Settings,
-  Calendar
+  Calendar,
+  Sun,
+  Moon
 } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 
 function TeacherSettingsPage() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const [profile, setProfile] = useState({
     name: "",
@@ -85,7 +89,7 @@ function TeacherSettingsPage() {
       // silently fail if endpoint not available
     }
 
-    setSaveMsg("Profile updated successfully 🚀");
+    setSaveMsg("Profile updated successfully ðŸš€");
     setTimeout(() => setSaveMsg(""), 3000);
   };
 
@@ -117,13 +121,13 @@ function TeacherSettingsPage() {
       });
       const data = await response.json();
       if (response.ok) {
-        setPwdMsg("Password changed successfully 🔐");
+        setPwdMsg("Password changed successfully ðŸ”");
         setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
       } else {
         setPwdMsg(data.detail || data.message || "Failed to change password.");
       }
     } catch (_) {
-      setPwdMsg("Password changed locally 🔐");
+      setPwdMsg("Password changed locally ðŸ”");
       setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
     }
     setTimeout(() => setPwdMsg(""), 3000);
@@ -135,10 +139,10 @@ function TeacherSettingsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex">
+    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-black dark:text-white flex">
 
       {/* SIDEBAR */}
-      <div className="w-72 bg-white/[0.03] border-r border-white/10 p-6 hidden md:flex flex-col">
+      <div className="w-72 bg-white dark:bg-white/[0.03] border-r border-gray-200 dark:border-white/10 p-6 hidden md:flex flex-col shadow-sm dark:shadow-none">
 
         {/* Logo */}
         <h1 className="text-3xl font-light">
@@ -147,11 +151,11 @@ function TeacherSettingsPage() {
         </h1>
 
         {/* Nav */}
-        <div className="mt-12 flex flex-col gap-5 text-gray-300 flex-1">
+        <div className="mt-12 flex flex-col gap-2 text-gray-600 dark:text-gray-300 flex-1">
 
           <div
             onClick={() => navigate("/teacher-dashboard")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
           >
             <LayoutDashboard size={20} />
             <p>Dashboard</p>
@@ -159,7 +163,7 @@ function TeacherSettingsPage() {
 
           <div
             onClick={() => navigate("/upload-notes")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
           >
             <Upload size={20} />
             <p>Upload Notes</p>
@@ -167,7 +171,7 @@ function TeacherSettingsPage() {
 
           <div
             onClick={() => navigate("/teacher-assignments")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
           >
             <FileText size={20} />
             <p>Assignments</p>
@@ -175,7 +179,7 @@ function TeacherSettingsPage() {
 
           <div
             onClick={() => navigate("/teacher-quizzes")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
           >
             <Award size={20} />
             <p>Quizzes</p>
@@ -183,7 +187,7 @@ function TeacherSettingsPage() {
 
           <div
             onClick={() => navigate("/student-management")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
           >
             <Users size={20} />
             <p>Students</p>
@@ -191,19 +195,23 @@ function TeacherSettingsPage() {
 
           <div
             onClick={() => navigate("/teacher-attendance")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
           >
             <Calendar size={20} />
             <p>Attendance</p>
           </div>
 
-          {/* Settings — active */}
+          {/* Settings â€” active */}
           <div
             onClick={() => navigate("/teacher-settings")}
-            className="flex items-center gap-3 bg-white/5 p-3 rounded-xl text-white cursor-pointer hover:bg-white/10 transition"
+            className="flex items-center gap-3 bg-blue-50 dark:bg-white/5 text-blue-600 dark:text-white p-3 rounded-xl cursor-pointer hover:bg-blue-100 dark:hover:bg-white/10 transition"
           >
             <Settings size={20} />
             <p>Settings</p>
+          </div>
+          <div onClick={toggleTheme} className="flex items-center gap-3 p-3 rounded-xl transition cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 text-gray-600 dark:text-gray-300">
+            {theme === "dark" ? <Sun size={20} className="text-yellow-400"/> : <Moon size={20} className="text-blue-500"/>}
+            <p>{theme === "dark" ? "Light Mode" : "Dark Mode"}</p>
           </div>
 
         </div>
@@ -263,7 +271,7 @@ function TeacherSettingsPage() {
                     value={profile.name}
                     onChange={handleChange}
                     placeholder="Enter your name"
-                    className="w-full bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition"
+                    className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition"
                   />
                 </div>
 
@@ -278,7 +286,7 @@ function TeacherSettingsPage() {
                       value={profile.className}
                       onChange={handleChange}
                       placeholder="e.g. 10th"
-                      className="w-full bg-white/10 border border-white/10 rounded-2xl pl-12 pr-5 py-4 outline-none focus:border-blue-500 transition"
+                      className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl pl-12 pr-5 py-4 outline-none focus:border-blue-500 transition"
                     />
                   </div>
                 </div>
@@ -292,7 +300,7 @@ function TeacherSettingsPage() {
                     value={profile.section}
                     onChange={handleChange}
                     placeholder="e.g. A"
-                    className="w-full bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition"
+                    className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition"
                   />
                 </div>
 
@@ -305,7 +313,7 @@ function TeacherSettingsPage() {
                     value={profile.email}
                     onChange={handleChange}
                     placeholder="Enter your email"
-                    className="w-full bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition"
+                    className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-blue-500 transition"
                   />
                 </div>
 
@@ -316,7 +324,7 @@ function TeacherSettingsPage() {
                     type="text"
                     value={profile.role}
                     disabled
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-gray-400 cursor-not-allowed"
+                    className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 text-gray-400 cursor-not-allowed"
                   />
                 </div>
 
@@ -362,7 +370,7 @@ function TeacherSettingsPage() {
                       onChange={(e) =>
                         setPasswords({ ...passwords, currentPassword: e.target.value })
                       }
-                      className="w-full bg-white/10 border border-white/10 rounded-2xl pl-12 pr-5 py-4 outline-none focus:border-purple-500 transition"
+                      className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl pl-12 pr-5 py-4 outline-none focus:border-purple-500 transition"
                     />
                   </div>
                 </div>
@@ -379,7 +387,7 @@ function TeacherSettingsPage() {
                       onChange={(e) =>
                         setPasswords({ ...passwords, newPassword: e.target.value })
                       }
-                      className="w-full bg-white/10 border border-white/10 rounded-2xl pl-12 pr-5 py-4 outline-none focus:border-purple-500 transition"
+                      className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl pl-12 pr-5 py-4 outline-none focus:border-purple-500 transition"
                     />
                   </div>
                 </div>
@@ -396,13 +404,13 @@ function TeacherSettingsPage() {
                       onChange={(e) =>
                         setPasswords({ ...passwords, confirmPassword: e.target.value })
                       }
-                      className="w-full bg-white/10 border border-white/10 rounded-2xl pl-12 pr-5 py-4 outline-none focus:border-purple-500 transition"
+                      className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl pl-12 pr-5 py-4 outline-none focus:border-purple-500 transition"
                     />
                   </div>
                 </div>
 
                 {pwdMsg && (
-                  <p className={`text-sm ${pwdMsg.includes("success") || pwdMsg.includes("🔐") ? "text-green-400" : "text-red-400"}`}>
+                  <p className={`text-sm ${pwdMsg.includes("success") || pwdMsg.includes("ðŸ”") ? "text-green-400" : "text-red-400"}`}>
                     {pwdMsg}
                   </p>
                 )}
@@ -425,3 +433,4 @@ function TeacherSettingsPage() {
 }
 
 export default TeacherSettingsPage;
+

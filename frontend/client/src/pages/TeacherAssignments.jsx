@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Plus, Trash2, Calendar, BookOpen, GraduationCap, Upload, Users, LayoutDashboard, LogOut, Award, Settings } from "lucide-react";
+import { FileText, Plus, Trash2, Calendar, BookOpen, GraduationCap, Upload, Users, LayoutDashboard, LogOut, Award, Settings, Sun, Moon } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 
 function TeacherAssignments() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [title, setTitle] = useState("");
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
@@ -62,7 +64,7 @@ function TeacherAssignments() {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Assignment Created Successfully 🚀");
+        alert("Assignment Created Successfully ðŸš€");
         setTitle("");
         setSubject("");
         setDescription("");
@@ -106,9 +108,9 @@ function TeacherAssignments() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex">
+    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-black dark:text-white flex">
       {/* Sidebar */}
-      <div className="w-72 bg-white/[0.03] border-r border-white/10 p-6 hidden md:block">
+      <div className="w-72 bg-white dark:bg-white/[0.03] border-r border-gray-200 dark:border-white/10 p-6 hidden md:flex flex-col shadow-sm dark:shadow-none">
         <h1 className="text-3xl font-light">
           Edunova
           <span className="text-blue-400 font-semibold">.AI</span>
@@ -116,54 +118,61 @@ function TeacherAssignments() {
         <div className="mt-12 flex flex-col gap-5 text-gray-300">
           <div
             onClick={() => navigate("/teacher-dashboard")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer text-gray-600 dark:text-gray-300"
           >
             <LayoutDashboard size={20} />
             <p>Dashboard</p>
           </div>
           <div
             onClick={() => navigate("/upload-notes")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer text-gray-600 dark:text-gray-300"
           >
             <Upload size={20} />
             <p>Upload Notes</p>
           </div>
           <div
             onClick={() => navigate("/teacher-assignments")}
-            className="flex items-center gap-3 bg-white/5 p-3 rounded-xl text-white cursor-pointer hover:bg-white/10 transition"
+            className="flex items-center gap-3 bg-blue-50 dark:bg-white/5 text-blue-600 dark:text-white p-3 rounded-xl cursor-pointer hover:bg-blue-100 dark:hover:bg-white/10 transition"
           >
             <FileText size={20} />
             <p>Assignments</p>
           </div>
           <div
             onClick={() => navigate("/teacher-quizzes")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer text-gray-600 dark:text-gray-300"
           >
             <Award size={20} />
             <p>Quizzes</p>
           </div>
           <div
             onClick={() => navigate("/student-management")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer text-gray-600 dark:text-gray-300"
           >
             <Users size={20} />
             <p>Students</p>
           </div>
           <div
             onClick={() => navigate("/teacher-attendance")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer text-gray-600 dark:text-gray-300"
           >
             <Calendar size={20} />
             <p>Attendance</p>
           </div>
           <div
             onClick={() => navigate("/teacher-settings")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer text-gray-600 dark:text-gray-300"
           >
             <Settings size={20} />
             <p>Settings</p>
           </div>
         </div>
+          <div
+            onClick={toggleTheme}
+            className="flex items-center gap-3 p-3 rounded-xl transition cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 text-gray-600 dark:text-gray-300 mt-4"
+          >
+            {theme === "dark" ? <Sun size={20} className="text-yellow-400"/> : <Moon size={20} className="text-blue-500"/>}
+            <p>{theme === "dark" ? "Light Mode" : "Dark Mode"}</p>
+          </div>
         <button
           onClick={() => {
             localStorage.clear();
@@ -197,7 +206,7 @@ function TeacherAssignments() {
               placeholder="Algebra Homework"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500"
+              className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500"
             />
           </div>
 
@@ -209,7 +218,7 @@ function TeacherAssignments() {
               placeholder="Mathematics"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500"
+              className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500"
             />
           </div>
         </div>
@@ -223,7 +232,7 @@ function TeacherAssignments() {
               placeholder="9th"
               value={studentClass}
               onChange={(e) => setStudentClass(e.target.value)}
-              className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500"
+              className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500"
             />
           </div>
 
@@ -235,7 +244,7 @@ function TeacherAssignments() {
               placeholder="Tomorrow 11:59 PM"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500"
+              className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500"
             />
           </div>
         </div>
@@ -247,7 +256,7 @@ function TeacherAssignments() {
             placeholder="Solve questions 1 to 10 on page 42..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 h-28 resize-none"
+            className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 h-28 resize-none"
           />
         </div>
 
@@ -267,7 +276,7 @@ function TeacherAssignments() {
 
         <div className="mt-8 space-y-6">
           {assignments.length === 0 && (
-            <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-10 text-center">
+            <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-10 text-center">
               <FileText size={60} className="mx-auto text-gray-500" />
               <h3 className="text-2xl mt-5 text-gray-400">No assignments created yet</h3>
             </div>
@@ -276,7 +285,7 @@ function TeacherAssignments() {
           {assignments.map((assignment) => (
             <div
               key={assignment.title}
-              className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 flex flex-col md:flex-row md:items-center justify-between gap-6"
+              className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 flex flex-col md:flex-row md:items-center justify-between gap-6"
             >
               <div>
                 <div className="flex items-center gap-3">

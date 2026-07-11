@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -489,7 +489,7 @@ function AdminDashboard() {
         {activeTab === "overview" && (
           <div className="space-y-12">
             {/* Hero Card */}
-            <div className="bg-white/[0.04] border border-white/10 rounded-[36px] p-8 md:p-10 backdrop-blur-2xl flex flex-col xl:flex-row gap-8 justify-between items-start xl:items-center">
+            <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-[36px] p-8 md:p-10 backdrop-blur-2xl flex flex-col xl:flex-row gap-8 justify-between items-start xl:items-center">
               <div>
                 <div className="flex items-center gap-2 text-blue-400">
                   <Sparkles size={18} />
@@ -521,7 +521,7 @@ function AdminDashboard() {
                   { title: "Teachers Count", val: analytics.stats?.total_teachers, color: "text-yellow-400" },
                   { title: "Files Uploaded (Notes)", val: analytics.stats?.total_notes, color: "text-purple-400" }
                 ].map((stat, idx) => (
-                  <div key={idx} className="bg-white/[0.04] border border-white/10 rounded-3xl p-6">
+                  <div key={idx} className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-6">
                     <span className="text-gray-500 text-sm">{stat.title}</span>
                     <h2 className={`text-5xl font-semibold mt-4 ${stat.color}`}>{stat.val}</h2>
                   </div>
@@ -530,7 +530,7 @@ function AdminDashboard() {
             )}
 
             {/* Recent Activity Logs */}
-            <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 space-y-6">
+            <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 space-y-6">
               <h2 className="text-2xl font-light">Recent Platform Logs</h2>
               <div className="divide-y divide-white/5 space-y-4">
                 {analytics.recent_activity?.length === 0 ? (
@@ -538,7 +538,7 @@ function AdminDashboard() {
                 ) : (
                   analytics.recent_activity?.map((log, idx) => (
                     <div key={idx} className="pt-4 flex items-center gap-3 text-gray-300 text-sm">
-                      <span className="text-blue-400">•</span>
+                      <span className="text-blue-400">â€¢</span>
                       <p>{log}</p>
                     </div>
                   ))
@@ -552,7 +552,7 @@ function AdminDashboard() {
         {activeTab === "users" && (
           <div className="space-y-8">
             {/* Create account form */}
-            <form onSubmit={handleCreateUser} className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 space-y-6">
+            <form onSubmit={handleCreateUser} className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 space-y-6">
               <h2 className="text-2xl font-light">Register Student or Teacher Account</h2>
               <div className="grid md:grid-cols-3 gap-6">
                 <div>
@@ -585,7 +585,7 @@ function AdminDashboard() {
                     value={userForm.password}
                     onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
                     className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500"
-                    placeholder="••••••"
+                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢"
                   />
                 </div>
                 <div>
@@ -623,7 +623,7 @@ function AdminDashboard() {
             </form>
 
             {/* List & controls */}
-            <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 space-y-6">
+            <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 space-y-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 {/* Search */}
                 <div className="relative w-full max-w-sm">
@@ -704,7 +704,7 @@ function AdminDashboard() {
         {/* CLASS CONFIGURATION TAB */}
         {activeTab === "classes" && (
           <div className="space-y-8">
-            <form onSubmit={handleCreateClass} className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 space-y-6">
+            <form onSubmit={handleCreateClass} className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 space-y-6">
               <h2 className="text-2xl font-light">Configure Class, Sections, and Subjects</h2>
               <div className="grid md:grid-cols-3 gap-6">
                 <div>
@@ -751,7 +751,7 @@ function AdminDashboard() {
                 <p className="text-gray-500 col-span-full text-center py-6">No class configurations saved.</p>
               ) : (
                 classes.map((cls, idx) => (
-                  <div key={idx} className="bg-white/[0.04] border border-white/10 rounded-3xl p-6 flex flex-col justify-between">
+                  <div key={idx} className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-6 flex flex-col justify-between">
                     <div>
                       <div className="flex justify-between items-start">
                         <h3 className="text-2xl font-light text-blue-400">{cls.class_name} Grade</h3>
@@ -783,7 +783,7 @@ function AdminDashboard() {
             ) : (
               <div className="space-y-10">
                 {/* Notes section */}
-                <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-6 space-y-4">
+                <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-6 space-y-4">
                   <h3 className="text-xl font-medium text-blue-400 flex items-center gap-2">
                     <BookOpen size={20} /> Study Notes Uploads
                   </h3>
@@ -807,7 +807,7 @@ function AdminDashboard() {
                 </div>
 
                 {/* Assignments section */}
-                <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-6 space-y-4">
+                <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-6 space-y-4">
                   <h3 className="text-xl font-medium text-green-400 flex items-center gap-2">
                     <FileText size={20} /> Assignments Published
                   </h3>
@@ -837,7 +837,7 @@ function AdminDashboard() {
         {/* NOTICE BOARD BROADCAST TAB */}
         {activeTab === "announcements" && (
           <div className="space-y-8">
-            <form onSubmit={handleCreateAnnouncement} className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 space-y-6">
+            <form onSubmit={handleCreateAnnouncement} className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 space-y-6">
               <h2 className="text-2xl font-light">Publish Announcement Notice</h2>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
@@ -890,7 +890,7 @@ function AdminDashboard() {
               ) : (
                 <div className="grid md:grid-cols-2 gap-6">
                   {announcements.map((announce, idx) => (
-                    <div key={idx} className="bg-white/[0.04] border border-white/10 rounded-3xl p-6 flex flex-col justify-between">
+                    <div key={idx} className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-6 flex flex-col justify-between">
                       <div>
                         <div className="flex justify-between items-start border-b border-white/5 pb-3">
                           <h3 className="text-xl font-medium truncate pr-4">{announce.title}</h3>
@@ -916,7 +916,7 @@ function AdminDashboard() {
         {activeTab === "settings" && (
           <div className="space-y-8">
             <h2 className="text-3xl font-light">System settings & Configuration</h2>
-            <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 space-y-6">
+            <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 space-y-6">
               <h3 className="text-xl font-medium text-blue-400 flex items-center gap-2">
                 <Settings size={20} /> AI Configuration
               </h3>
@@ -957,7 +957,7 @@ function AdminDashboard() {
                 </div>
               </div>
               
-              <button onClick={() => alert("AI Platform Settings Saved 🚀")} className="bg-blue-500 hover:bg-blue-600 transition px-8 py-3.5 rounded-2xl font-semibold mt-4">
+              <button onClick={() => alert("AI Platform Settings Saved ðŸš€")} className="bg-blue-500 hover:bg-blue-600 transition px-8 py-3.5 rounded-2xl font-semibold mt-4">
                 Save System Settings
               </button>
             </div>

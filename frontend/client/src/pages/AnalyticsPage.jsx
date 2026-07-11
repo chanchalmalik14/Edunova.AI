@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+﻿import React, { useState, useEffect } from "react";
 
 import {
   Brain,
@@ -69,7 +69,7 @@ function AnalyticsPage() {
 
   return (
 
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-black dark:text-white relative overflow-hidden">
 
       {/* Background Glow */}
       <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/20 blur-[140px] rounded-full" />
@@ -99,7 +99,7 @@ function AnalyticsPage() {
 
             <div
               key={index}
-              className="bg-white/[0.05] backdrop-blur-2xl border border-white/10 rounded-[32px] p-8 shadow-2xl hover:border-white/20 transition-all duration-300"
+              className="bg-white dark:bg-white/[0.05] backdrop-blur-sm dark:backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[32px] p-8 shadow-2xl hover:border-white/20 transition-all duration-300"
             >
 
               {/* Icon */}
@@ -133,7 +133,7 @@ function AnalyticsPage() {
         <div className="grid lg:grid-cols-2 gap-10 mt-14">
 
           {/* Weekly Progress */}
-          <div className="bg-white/[0.05] backdrop-blur-2xl border border-white/10 rounded-[32px] p-8 shadow-2xl">
+          <div className="bg-white dark:bg-white/[0.05] backdrop-blur-sm dark:backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[32px] p-8 shadow-2xl">
 
             <div className="flex items-center gap-4">
 
@@ -237,7 +237,7 @@ function AnalyticsPage() {
           </div>
 
           {/* Performance */}
-          <div className="bg-white/[0.05] backdrop-blur-2xl border border-white/10 rounded-[32px] p-8 shadow-2xl">
+          <div className="bg-white dark:bg-white/[0.05] backdrop-blur-sm dark:backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[32px] p-8 shadow-2xl">
 
             <div className="flex items-center gap-4">
 
@@ -270,7 +270,7 @@ function AnalyticsPage() {
               <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
 
                 <h3 className="text-2xl">
-                  🏆 Fast Learner
+                  ðŸ† Fast Learner
                 </h3>
 
                 <p className="text-gray-400 mt-3">
@@ -282,7 +282,7 @@ function AnalyticsPage() {
               <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
 
                 <h3 className="text-2xl">
-                  📚 Active Reader
+                  ðŸ“š Active Reader
                 </h3>
 
                 <p className="text-gray-400 mt-3">
@@ -294,7 +294,7 @@ function AnalyticsPage() {
               <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
 
                 <h3 className="text-2xl">
-                  🚀 Assignment Master
+                  ðŸš€ Assignment Master
                 </h3>
 
                 <p className="text-gray-400 mt-3">

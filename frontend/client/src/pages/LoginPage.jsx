@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
@@ -186,7 +186,7 @@ function LoginPage() {
           <div className="text-center">
             <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
               <div className="text-4xl">
-                ✅
+                âœ…
               </div>
             </div>
             <h2 className="text-3xl mt-6 text-green-400 font-medium">

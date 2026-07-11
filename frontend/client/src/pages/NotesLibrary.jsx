@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 
 import {
   FileText,
@@ -56,7 +56,7 @@ function NotesLibrary() {
 
         {notes.length === 0 && (
 
-          <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-12 text-center">
+          <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-12 text-center">
 
             <BookOpen
               size={70}
@@ -79,7 +79,7 @@ function NotesLibrary() {
 
           <div
             key={note.filename}
-            className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 flex flex-col md:flex-row md:items-center justify-between gap-6"
+            className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 flex flex-col md:flex-row md:items-center justify-between gap-6"
           >
 
             {/* Left */}
@@ -99,11 +99,11 @@ function NotesLibrary() {
               </div>
 
               <p className="text-gray-400 mt-3">
-                📘 {note.subject}
+                ðŸ“˜ {note.subject}
               </p>
 
               <p className="text-gray-500 mt-3">
-                📄 {note.filename}
+                ðŸ“„ {note.filename}
               </p>
 
               <p className="text-gray-600 mt-4 text-sm">

@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { LayoutDashboard, Upload, FileText, Users, LogOut, Brain, Plus, Trash2, CheckCircle, HelpCircle, Award, Settings, Calendar } from "lucide-react";
+import { LayoutDashboard, Upload, FileText, Users, LogOut, Brain, Plus, Trash2, CheckCircle, HelpCircle, Award, Settings, Calendar, Sun, Moon } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 
 function TeacherQuizzes() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   // Tab: "ai" (Generate Quiz), "manual" (Create Custom), "results" (Review Results)
   const [activeTab, setActiveTab] = useState("ai");
@@ -97,7 +99,7 @@ function TeacherQuizzes() {
       const data = await response.json();
 
       if (response.ok) {
-        alert("AI Quiz Published Successfully 🚀");
+        alert("AI Quiz Published Successfully ðŸš€");
         setAiPreviewQuiz(null);
         setNotesText("");
       } else {
@@ -171,7 +173,7 @@ function TeacherQuizzes() {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Custom Quiz Created Successfully 🚀");
+        alert("Custom Quiz Created Successfully ðŸš€");
         setManualTitle("");
         setManualQuestions([{ question: "", options: ["", "", "", ""], correct_answer: "" }]);
       } else {
@@ -184,62 +186,66 @@ function TeacherQuizzes() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex">
+    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-black dark:text-white flex">
       {/* Sidebar */}
-      <div className="w-72 bg-white/[0.03] border-r border-white/10 p-6 hidden md:block">
+      <div className="w-72 bg-white dark:bg-white/[0.03] border-r border-gray-200 dark:border-white/10 p-6 hidden md:flex flex-col shadow-sm dark:shadow-none">
         <h1 className="text-3xl font-light">
           Edunova
           <span className="text-blue-400 font-semibold">.AI</span>
         </h1>
-        <div className="mt-12 flex flex-col gap-5 text-gray-300">
+        <div className="mt-12 flex flex-col gap-2 text-gray-600 dark:text-gray-300 flex-1">
           <div
             onClick={() => navigate("/teacher-dashboard")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
           >
             <LayoutDashboard size={20} />
             <p>Dashboard</p>
           </div>
           <div
             onClick={() => navigate("/upload-notes")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
           >
             <Upload size={20} />
             <p>Upload Notes</p>
           </div>
           <div
             onClick={() => navigate("/teacher-assignments")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
           >
             <FileText size={20} />
             <p>Assignments</p>
           </div>
           <div
             onClick={() => navigate("/teacher-quizzes")}
-            className="flex items-center gap-3 bg-white/5 p-3 rounded-xl text-white cursor-pointer hover:bg-white/10 transition"
+            className="flex items-center gap-3 bg-blue-50 dark:bg-white/5 text-blue-600 dark:text-white p-3 rounded-xl cursor-pointer hover:bg-blue-100 dark:hover:bg-white/10 transition"
           >
             <Award size={20} />
             <p>Quizzes</p>
           </div>
           <div
             onClick={() => navigate("/student-management")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
           >
             <Users size={20} />
             <p>Students</p>
           </div>
           <div
             onClick={() => navigate("/teacher-attendance")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
           >
             <Calendar size={20} />
             <p>Attendance</p>
           </div>
           <div
             onClick={() => navigate("/teacher-settings")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
           >
             <Settings size={20} />
             <p>Settings</p>
+          </div>
+          <div onClick={toggleTheme} className="flex items-center gap-3 p-3 rounded-xl transition cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 text-gray-600 dark:text-gray-300 mt-2">
+            {theme === "dark" ? <Sun size={20} className="text-yellow-400"/> : <Moon size={20} className="text-blue-500"/>}
+            <p>{theme === "dark" ? "Light Mode" : "Dark Mode"}</p>
           </div>
         </div>
         <button
@@ -298,7 +304,7 @@ function TeacherQuizzes() {
         {/* AI GENERATOR TAB */}
         {activeTab === "ai" && (
           <div className="mt-12 space-y-8">
-            <form onSubmit={handleGenerateAIQuiz} className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 space-y-4">
+            <form onSubmit={handleGenerateAIQuiz} className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 space-y-4">
               <h2 className="text-2xl font-light">Generate Quiz with Gemini</h2>
               <p className="text-sm text-gray-400">Paste your class lecture notes or topic details below, and Gemini will automatically generate 5 multiple choice questions.</p>
               
@@ -350,7 +356,7 @@ function TeacherQuizzes() {
                                 : "border-white/5 bg-white/[0.02] text-gray-400"
                             }`}
                           >
-                            {opt} {opt === q.correct_answer && "✓ (Correct)"}
+                            {opt} {opt === q.correct_answer && "âœ“ (Correct)"}
                           </div>
                         ))}
                       </div>
@@ -467,7 +473,7 @@ function TeacherQuizzes() {
 
             <div className="mt-8 space-y-4">
               {results.length === 0 && (
-                <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-12 text-center col-span-full">
+                <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-12 text-center col-span-full">
                   <HelpCircle size={60} className="mx-auto text-gray-500" />
                   <h3 className="text-2xl mt-5 text-gray-400">No student quiz attempts recorded yet</h3>
                 </div>
@@ -476,7 +482,7 @@ function TeacherQuizzes() {
               {results.map((res, idx) => (
                 <div
                   key={idx}
-                  className="bg-white/[0.04] border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                  className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4"
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-400 font-bold text-lg">
@@ -503,3 +509,4 @@ function TeacherQuizzes() {
 }
 
 export default TeacherQuizzes;
+

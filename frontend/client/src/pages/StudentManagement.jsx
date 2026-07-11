@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, GraduationCap, Mail, School, FileText, Download, CheckCircle, Upload, LayoutDashboard, LogOut, Award, Settings, Calendar } from "lucide-react";
+import { Users, GraduationCap, Mail, School, FileText, Download, CheckCircle, Upload, LayoutDashboard, LogOut, Award, Settings, Calendar, Sun, Moon } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 
 function StudentManagement() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [students, setStudents] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [activeTab, setActiveTab] = useState("roster"); // "roster" or "submissions"
@@ -50,9 +52,9 @@ function StudentManagement() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white flex">
+    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-black dark:text-white flex">
       {/* Sidebar */}
-      <div className="w-72 bg-white/[0.03] border-r border-white/10 p-6 hidden md:block">
+      <div className="w-72 bg-white dark:bg-white/[0.03] border-r border-gray-200 dark:border-white/10 p-6 hidden md:flex flex-col shadow-sm dark:shadow-none">
         <h1 className="text-3xl font-light">
           Edunova
           <span className="text-blue-400 font-semibold">.AI</span>
@@ -60,59 +62,59 @@ function StudentManagement() {
         <div className="mt-12 flex flex-col gap-5 text-gray-300">
           <div
             onClick={() => navigate("/teacher-dashboard")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer text-gray-600 dark:text-gray-300"
           >
             <LayoutDashboard size={20} />
             <p>Dashboard</p>
           </div>
           <div
             onClick={() => navigate("/upload-notes")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer text-gray-600 dark:text-gray-300"
           >
             <Upload size={20} />
             <p>Upload Notes</p>
           </div>
           <div
             onClick={() => navigate("/teacher-assignments")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer text-gray-600 dark:text-gray-300"
           >
             <FileText size={20} />
             <p>Assignments</p>
           </div>
           <div
             onClick={() => navigate("/teacher-quizzes")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer text-gray-600 dark:text-gray-300"
           >
             <Award size={20} />
             <p>Quizzes</p>
           </div>
           <div
             onClick={() => navigate("/student-management")}
-            className="flex items-center gap-3 bg-white/5 p-3 rounded-xl text-white cursor-pointer hover:bg-white/10 transition"
+            className="flex items-center gap-3 bg-blue-50 dark:bg-white/5 text-blue-600 dark:text-white p-3 rounded-xl cursor-pointer hover:bg-blue-100 dark:hover:bg-white/10 transition"
           >
             <Users size={20} />
             <p>Students</p>
           </div>
           <div
             onClick={() => navigate("/teacher-attendance")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer text-gray-600 dark:text-gray-300"
           >
             <Calendar size={20} />
             <p>Attendance</p>
           </div>
           <div
             onClick={() => navigate("/teacher-settings")}
-            className="flex items-center gap-3 hover:bg-white/5 p-3 rounded-xl transition cursor-pointer"
+            className="flex items-center gap-3 hover:bg-gray-100 dark:hover:bg-white/5 p-3 rounded-xl transition cursor-pointer text-gray-600 dark:text-gray-300"
           >
             <Settings size={20} />
             <p>Settings</p>
           </div>
         </div>
-        <button
-          onClick={() => {
-            localStorage.clear();
-            navigate("/login");
-          }}
+          <div onClick={toggleTheme} className="flex items-center gap-3 p-3 rounded-xl transition cursor-pointer hover:bg-gray-100 dark:hover:bg-white/5 text-gray-600 dark:text-gray-300 mt-4">
+            {theme === "dark" ? <Sun size={20} className="text-yellow-400"/> : <Moon size={20} className="text-blue-500"/>}
+            <p>{theme === "dark" ? "Light Mode" : "Dark Mode"}</p>
+          </div>
+        <button onClick={() => { localStorage.clear(); navigate("/login"); }}
           className="mt-10 w-full bg-red-500 hover:bg-red-600 transition-all duration-300 py-3 rounded-2xl flex items-center justify-center gap-2"
         >
           <LogOut size={18} />
@@ -157,7 +159,7 @@ function StudentManagement() {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
             {students.length === 0 && (
-              <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-12 text-center col-span-full">
+              <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-12 text-center col-span-full">
                 <Users size={60} className="mx-auto text-gray-500" />
                 <h3 className="text-2xl mt-5 text-gray-400">No students registered yet</h3>
               </div>
@@ -166,7 +168,7 @@ function StudentManagement() {
             {students.map((student, idx) => (
               <div
                 key={student.email || idx}
-                className="bg-white/[0.04] border border-white/10 rounded-3xl p-6 hover:border-blue-500/50 transition-all duration-300"
+                className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-6 hover:border-blue-500/50 transition-all duration-300"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center font-bold text-blue-400 text-lg">
@@ -204,7 +206,7 @@ function StudentManagement() {
 
           <div className="mt-8 space-y-6">
             {submissions.length === 0 && (
-              <div className="bg-white/[0.04] border border-white/10 rounded-3xl p-12 text-center">
+              <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-12 text-center">
                 <FileText size={60} className="mx-auto text-gray-500" />
                 <h3 className="text-2xl mt-5 text-gray-400">No assignment submissions yet</h3>
               </div>
@@ -213,7 +215,7 @@ function StudentManagement() {
             {submissions.map((sub, idx) => (
               <div
                 key={idx}
-                className="bg-white/[0.04] border border-white/10 rounded-3xl p-8 flex flex-col md:flex-row md:items-start justify-between gap-6 hover:border-green-500/30 transition-all duration-300"
+                className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 flex flex-col md:flex-row md:items-start justify-between gap-6 hover:border-green-500/30 transition-all duration-300"
               >
                 <div className="space-y-4 flex-1">
                   <div className="flex items-center gap-3">

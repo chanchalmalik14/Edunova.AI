@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+﻿import React, { useState } from "react";
 
 function AINotesPage() {
   const [chats, setChats] = useState([]);
@@ -51,7 +51,7 @@ function AINotesPage() {
 
     const aiMsg = {
       role: "ai",
-      text: "⌛ Generating AI Notes...",
+      text: "âŒ› Generating AI Notes...",
     };
 
     setChats((prev) =>
@@ -109,7 +109,7 @@ function AINotesPage() {
             const placeholderIndex = updatedMessages.length - 1;
             updatedMessages[placeholderIndex] = {
               role: "ai",
-              text: `❌ Error: ${err.message || "Could not connect to AI service."}`,
+              text: `âŒ Error: ${err.message || "Could not connect to AI service."}`,
             };
             return { ...chat, messages: updatedMessages };
           }
@@ -178,7 +178,7 @@ function AINotesPage() {
               </h1>
 
               <p className="text-gray-400 mt-3">
-                Your AI notes assistant for learning smarter 🚀
+                Your AI notes assistant for learning smarter ðŸš€
               </p>
 
               {/* suggestions */}
@@ -234,7 +234,7 @@ function AINotesPage() {
           <div className="max-w-3xl mx-auto flex items-center gap-3 bg-white/5 p-3 rounded-2xl">
 
             <label className="cursor-pointer text-xl px-2">
-              📎
+              ðŸ“Ž
               <input
                 type="file"
                 hidden
@@ -266,3 +266,4 @@ function AINotesPage() {
 }
 
 export default AINotesPage;
+

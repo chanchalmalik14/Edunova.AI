@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
+import { useTheme } from "../context/ThemeContext";
 
-import {
+import { Sun, Moon,
   User,
   School,
   Shield,
@@ -10,6 +11,7 @@ import {
 
 function SettingsPage() {
 
+  const { theme, toggleTheme } = useTheme();
   const [profile, setProfile] = useState({
     name: "",
     school: "",
@@ -76,7 +78,7 @@ function SettingsPage() {
 
     localStorage.setItem("role", profile.role);
 
-    alert("Profile Updated Successfully 🚀");
+    alert("Profile Updated Successfully ðŸš€");
   };
 
   // Password Change
@@ -97,7 +99,7 @@ function SettingsPage() {
       passwords.newPassword
     );
 
-    alert("Password Changed Successfully 🔐");
+    alert("Password Changed Successfully ðŸ”");
 
     setPasswords({
       newPassword: "",
@@ -107,7 +109,7 @@ function SettingsPage() {
 
   return (
 
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
+    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-black dark:text-white relative overflow-hidden">
 
       {/* Background Glow */}
       <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/20 blur-[140px] rounded-full" />
@@ -134,7 +136,7 @@ function SettingsPage() {
         <div className="grid lg:grid-cols-2 gap-10 mt-14">
 
           {/* Profile Section */}
-          <div className="bg-white/[0.05] backdrop-blur-2xl border border-white/10 rounded-[32px] p-8 shadow-2xl">
+          <div className="bg-white dark:bg-white/[0.05] backdrop-blur-sm dark:backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[32px] p-8 shadow-md dark:shadow-2xl">
 
             {/* Heading */}
             <div className="flex items-center gap-4">
@@ -178,7 +180,7 @@ function SettingsPage() {
                   value={profile.name}
                   onChange={handleChange}
                   placeholder="Enter your name"
-                  className="w-full bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-blue-500"
+                  className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-blue-500"
                 />
 
               </div>
@@ -203,7 +205,7 @@ function SettingsPage() {
                     value={profile.school}
                     onChange={handleChange}
                     placeholder="Enter school name"
-                    className="w-full bg-white/10 border border-white/10 rounded-2xl pl-12 pr-5 py-4 outline-none focus:border-blue-500"
+                    className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl pl-12 pr-5 py-4 outline-none focus:border-blue-500"
                   />
 
                 </div>
@@ -223,7 +225,7 @@ function SettingsPage() {
                   value={profile.className}
                   onChange={handleChange}
                   placeholder="Class 10"
-                  className="w-full bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-blue-500"
+                  className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-blue-500"
                 />
 
               </div>
@@ -241,7 +243,7 @@ function SettingsPage() {
                   value={profile.rollNo}
                   onChange={handleChange}
                   placeholder="Enter roll number"
-                  className="w-full bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-blue-500"
+                  className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-blue-500"
                 />
 
               </div>
@@ -259,7 +261,7 @@ function SettingsPage() {
                   value={profile.email}
                   onChange={handleChange}
                   placeholder="Enter email"
-                  className="w-full bg-white/10 border border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-blue-500"
+                  className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 outline-none focus:border-blue-500"
                 />
 
               </div>
@@ -275,7 +277,7 @@ function SettingsPage() {
                   type="text"
                   value={profile.role}
                   disabled
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-gray-400"
+                  className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 text-gray-400"
                 />
 
               </div>
@@ -297,7 +299,7 @@ function SettingsPage() {
           </div>
 
           {/* Security Section */}
-          <div className="bg-white/[0.05] backdrop-blur-2xl border border-white/10 rounded-[32px] p-8 shadow-2xl">
+          <div className="bg-white dark:bg-white/[0.05] backdrop-blur-sm dark:backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[32px] p-8 shadow-md dark:shadow-2xl">
 
             {/* Heading */}
             <div className="flex items-center gap-4">
@@ -352,7 +354,7 @@ function SettingsPage() {
                         newPassword: e.target.value
                       })
                     }
-                    className="w-full bg-white/10 border border-white/10 rounded-2xl pl-12 pr-5 py-4 outline-none focus:border-purple-500"
+                    className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl pl-12 pr-5 py-4 outline-none focus:border-purple-500"
                   />
 
                 </div>
@@ -383,7 +385,7 @@ function SettingsPage() {
                         confirmPassword: e.target.value
                       })
                     }
-                    className="w-full bg-white/10 border border-white/10 rounded-2xl pl-12 pr-5 py-4 outline-none focus:border-purple-500"
+                    className="w-full bg-gray-100 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl pl-12 pr-5 py-4 outline-none focus:border-purple-500"
                   />
 
                 </div>
@@ -403,6 +405,30 @@ function SettingsPage() {
           </div>
 
         </div>
+          {/* Appearance Section */}
+          <div className="bg-white dark:bg-white/[0.05] backdrop-blur-sm dark:backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[32px] p-8 shadow-md dark:shadow-2xl col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-yellow-500/10 flex items-center justify-center">
+                {theme === "dark" ? <Sun className="text-yellow-400" size={28}/> : <Moon className="text-blue-500" size={28}/>}
+              </div>
+              <div>
+                <h2 className="text-3xl">Appearance</h2>
+                <p className="text-gray-500 dark:text-gray-400 mt-1">Switch between dark and light theme</p>
+              </div>
+            </div>
+            <div className="mt-8 flex items-center justify-between p-5 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl">
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">{theme === "dark" ? "Dark Mode" : "Light Mode"}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{theme === "dark" ? "Easy on the eyes at night" : "Clean and bright interface"}</p>
+              </div>
+              <button
+                onClick={toggleTheme}
+                className={`relative inline-flex h-8 w-16 items-center rounded-full transition-colors duration-300 focus:outline-none ${theme === "dark" ? "bg-blue-500" : "bg-gray-300"}`}
+              >
+                <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform duration-300 ${theme === "dark" ? "translate-x-9" : "translate-x-1"}`}/>
+              </button>
+            </div>
+          </div>
 
       </div>
 

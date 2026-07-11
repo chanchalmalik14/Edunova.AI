@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FileText, HelpCircle, CheckCircle, AlertTriangle, Calendar } from "lucide-react";
 
@@ -130,7 +130,7 @@ function QuizPage() {
       {/* Top Header */}
       <div className="flex justify-between items-center max-w-2xl mx-auto w-full">
         <h1 className="text-2xl font-light">
-          🧠 Quiz: <span className="text-blue-400">{quiz.title}</span>
+          ðŸ§  Quiz: <span className="text-blue-400">{quiz.title}</span>
         </h1>
         <button
           onClick={() => navigate(-1)}
@@ -175,7 +175,7 @@ function QuizPage() {
                               : "border-white/5 bg-white/[0.01] text-gray-400"
                           }`}
                         >
-                          {opt} {isCorrect && "✓ (Correct Answer)"}
+                          {opt} {isCorrect && "âœ“ (Correct Answer)"}
                         </div>
                       );
                     })}
