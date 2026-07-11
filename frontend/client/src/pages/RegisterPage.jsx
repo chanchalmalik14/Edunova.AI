@@ -1,16 +1,12 @@
 ﻿import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  User,
-  Mail,
-  Lock,
-  School,
-  GraduationCap
-} from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
+import { Sun, Moon, User, Mail, Lock, School, GraduationCap } from "lucide-react";
 
 function RegisterPage() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [step, setStep] = useState(1);
   const [role, setRole] = useState("");
   const [showSuccess, setShowSuccess] = useState(false);
@@ -75,7 +71,15 @@ function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-white flex items-center justify-center px-6 relative overflow-hidden">
+            {/* Theme Toggle */}
+      <button
+        onClick={toggleTheme}
+        className="absolute top-5 right-5 z-20 w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 border border-gray-200 dark:border-white/10 transition-all duration-300 shadow-sm"
+      >
+        {theme === "dark" ? <Sun size={18} className="text-yellow-400"/> : <Moon size={18} className="text-blue-500"/>}
+      </button>
+
       {/* Background Glow */}
       <motion.div
         animate={{ scale: [1, 1.2, 1] }}
@@ -94,7 +98,7 @@ function RegisterPage() {
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative z-10 w-full max-w-2xl bg-white/[0.05] backdrop-blur-2xl border border-white/10 rounded-[40px] p-10 shadow-2xl"
+        className="relative z-10 w-full max-w-2xl bg-white dark:bg-white/[0.05] backdrop-blur-sm dark:backdrop-blur-2xl border border-gray-200 dark:border-white/10 rounded-[40px] p-10 shadow-2xl"
       >
         {/* Logo */}
         <div className="text-center">
@@ -195,7 +199,7 @@ function RegisterPage() {
               <p className="mb-3 text-gray-400">
                 Full Name
               </p>
-              <div className="flex items-center bg-white/5 border border-white/10 rounded-2xl px-4">
+              <div className="flex items-center bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-4">
                 <User
                   className="text-gray-500"
                   size={20}
@@ -217,7 +221,7 @@ function RegisterPage() {
               <p className="mb-3 text-gray-400">
                 Email Address
               </p>
-              <div className="flex items-center bg-white/5 border border-white/10 rounded-2xl px-4">
+              <div className="flex items-center bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-4">
                 <Mail
                   className="text-gray-500"
                   size={20}
@@ -239,7 +243,7 @@ function RegisterPage() {
               <p className="mb-3 text-gray-400">
                 School Name
               </p>
-              <div className="flex items-center bg-white/5 border border-white/10 rounded-2xl px-4">
+              <div className="flex items-center bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-4">
                 <School
                   className="text-gray-500"
                   size={20}
@@ -262,7 +266,7 @@ function RegisterPage() {
                 <p className="mb-3 text-gray-400">
                   Class
                 </p>
-                <div className="flex items-center bg-white/5 border border-white/10 rounded-2xl px-4">
+                <div className="flex items-center bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-4">
                   <GraduationCap
                     className="text-gray-500"
                     size={20}
@@ -285,7 +289,7 @@ function RegisterPage() {
               <p className="mb-3 text-gray-400">
                 Password
               </p>
-              <div className="flex items-center bg-white/5 border border-white/10 rounded-2xl px-4">
+              <div className="flex items-center bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-4">
                 <Lock
                   className="text-gray-500"
                   size={20}
@@ -349,4 +353,6 @@ function RegisterPage() {
 }
 
 export default RegisterPage;
+
+
 
