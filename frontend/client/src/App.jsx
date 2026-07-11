@@ -14,6 +14,7 @@ import TeacherQuizzes from "./pages/TeacherQuizzes";
 import TeacherSettingsPage from "./pages/TeacherSettingsPage";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import SuperAdminPanel from "./pages/SuperAdminPanel";
 
 import UploadNotesPage from "./pages/UploadNotesPage";
 import TeacherAttendance from "./pages/TeacherAttendance";
@@ -56,6 +57,12 @@ function App() {
       <Route
         path="/register"
         element={<RegisterPage />}
+      />
+
+      {/* Super Admin Panel — protected by secret key */}
+      <Route
+        path="/superadmin"
+        element={<SuperAdminPanel />}
       />
 
       {/* Student Dashboard */}
