@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from database.db import db
 from utils.auth_middleware import verify_token
 from utils.role_checker import admin_only
@@ -6,6 +6,11 @@ from pydantic import BaseModel
 from typing import List, Optional
 from utils.hashing import hash_password
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+SUPER_ADMIN_KEY = os.getenv("SUPER_ADMIN_KEY", "edunova-superadmin-2024")
 
 router = APIRouter()
 
@@ -230,3 +235,142 @@ def get_content(user_data = Depends(verify_token)):
         "assignments": assignments,
         "quizzes": quizzes
     }
+
+
+# ═══════════════════════════════════════════════════════════
+# SUPER ADMIN ROUTES — Protected by static key, not JWT
+# Used by Edunova team to onboard new schools and admins
+# ═══════════════════════════════════════════════════════════
+
+def verify_super_admin(x_super_admin_key: str = Header(...)):
+    """Dependency: validates the super admin key from request header."""
+    if x_super_admin_key != SUPER_ADMIN_KEY:
+        raise HTTPException(
+            status_code=403,
+            detail="Invalid Super Admin key. Access denied."
+        )
+    return True
+
+
+class CreateSchoolRequest(BaseModel):
+    name: str
+    city: Optional[str] = ""
+    contact_email: Optional[str] = ""
+
+
+class CreateAdminRequest(BaseModel):
+    full_name: str
+    email: str
+    password: str
+    school_name: str
+
+
+@router.post("/superadmin/create-school")
+def create_school(
+    request: CreateSchoolRequest,
+    _=Depends(verify_super_admin)
+):
+    """Create a new school on the Edunova platform."""
+    existing = db["schools"].find_one({"name": {"$regex": f"^{request.name}$", "$options": "i"}})
+    if existing:
+        raise HTTPException(status_code=400, detail=f"School '{request.name}' already exists.")
+
+    db["schools"].insert_one({
+        "name": request.name,
+        "city": request.city,
+        "contact_email": request.contact_email,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M")
+    })
+    return {"message": f"School '{request.name}' created successfully."}
+
+
+@router.get("/superadmin/schools")
+def list_schools(_=Depends(verify_super_admin)):
+    """List all schools registered on Edunova."""
+    schools = list(db["schools"].find({}, {"_id": 0}))
+    return {"schools": schools}
+
+
+@router.post("/superadmin/create-admin")
+def create_admin(
+    request: CreateAdminRequest,
+    _=Depends(verify_super_admin)
+):
+    """Create a school admin account. Only callable by Edunova Super Admin."""
+    # Verify school exists
+    school = db["schools"].find_one({"name": {"$regex": f"^{request.school_name}$", "$options": "i"}})
+    if not school:
+        raise HTTPException(
+            status_code=404,
+            detail=f"School '{request.school_name}' not found. Create the school first."
+        )
+
+    # Check email uniqueness
+    if db["users"].find_one({"email": request.email}):
+        raise HTTPException(status_code=400, detail="A user with this email already exists.")
+
+    hashed_pw = hash_password(request.password)
+    db["users"].insert_one({
+        "full_name": request.full_name,
+        "email": request.email,
+        "password": hashed_pw,
+        "role": "admin",
+        "school_name": school["name"],
+        "student_class": "",
+        "status": "active",
+        "registered_at": datetime.now().strftime("%Y-%m-%d %H:%M")
+    })
+    return {
+        "message": f"Admin account created for '{request.full_name}' at '{school['name']}'.",
+        "email": request.email
+    }
+
+
+# ═══════════════════════════════════════════════════════════
+# TEACHER APPROVAL — School Admin reviews pending teachers
+# ═══════════════════════════════════════════════════════════
+
+@router.get("/admin/pending-teachers")
+def get_pending_teachers(user_data=Depends(verify_token)):
+    """Get all teachers awaiting approval for this admin's school."""
+    admin_only(user_data)
+    school = user_data.get("school_name", "")
+
+    pending = list(db["users"].find(
+        {"role": "teacher", "status": "pending", "school_name": school},
+        {"_id": 0, "password": 0}
+    ))
+    return {"pending_teachers": pending}
+
+
+@router.post("/admin/approve-teacher/{email}")
+def approve_teacher(email: str, user_data=Depends(verify_token)):
+    """Approve a pending teacher — they can now log in."""
+    admin_only(user_data)
+    school = user_data.get("school_name", "")
+
+    teacher = db["users"].find_one({"email": email, "role": "teacher", "school_name": school})
+    if not teacher:
+        raise HTTPException(status_code=404, detail="Teacher not found in your school.")
+
+    if teacher.get("status") == "active":
+        return {"message": "Teacher is already active."}
+
+    db["users"].update_one(
+        {"email": email},
+        {"$set": {"status": "active", "approved_at": datetime.now().strftime("%Y-%m-%d %H:%M")}}
+    )
+    return {"message": f"Teacher '{teacher['full_name']}' has been approved and can now log in."}
+
+
+@router.post("/admin/reject-teacher/{email}")
+def reject_teacher(email: str, user_data=Depends(verify_token)):
+    """Reject and remove a pending teacher registration."""
+    admin_only(user_data)
+    school = user_data.get("school_name", "")
+
+    result = db["users"].delete_one({"email": email, "role": "teacher", "status": "pending", "school_name": school})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Pending teacher not found.")
+
+    return {"message": "Teacher registration rejected and removed."}

@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -50,9 +50,11 @@ function AdminDashboard() {
   // User Management states
   const [teachers, setTeachers] = useState([]);
   const [students, setStudents] = useState([]);
+  const [pendingTeachers, setPendingTeachers] = useState([]);
   const [userRoleFilter, setUserRoleFilter] = useState("teacher"); // "teacher" or "student"
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingPending, setLoadingPending] = useState(false);
 
   // Create User Form
   const [userForm, setUserForm] = useState({
@@ -117,7 +119,7 @@ function AdminDashboard() {
   // Tab Load triggers
   useEffect(() => {
     if (activeTab === "overview") fetchAnalytics();
-    if (activeTab === "users") fetchUsers();
+    if (activeTab === "users") { fetchUsers(); fetchPendingTeachers(); }
     if (activeTab === "classes") fetchClasses();
     if (activeTab === "content") fetchContent();
     if (activeTab === "announcements") fetchAnnouncements();
@@ -165,6 +167,51 @@ function AdminDashboard() {
     } finally {
       setLoadingUsers(false);
     }
+  };
+
+  // Fetch Pending Teachers
+  const fetchPendingTeachers = async () => {
+    setLoadingPending(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://127.0.0.1:8000/admin/pending-teachers", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) setPendingTeachers(data.pending_teachers || []);
+    } catch (err) { console.error(err); }
+    finally { setLoadingPending(false); }
+  };
+
+  // Approve Teacher
+  const handleApproveTeacher = async (email) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://127.0.0.1:8000/admin/approve-teacher/${encodeURIComponent(email)}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPendingTeachers(prev => prev.filter(t => t.email !== email));
+        setTeachers(prev => [...prev, { ...pendingTeachers.find(t => t.email === email), status: "active" }]);
+      } else {
+        alert(data.detail || "Failed to approve teacher");
+      }
+    } catch (err) { console.error(err); }
+  };
+
+  // Reject Teacher
+  const handleRejectTeacher = async (email) => {
+    if (!window.confirm(`Reject and remove ${email}?`)) return;
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://127.0.0.1:8000/admin/reject-teacher/${encodeURIComponent(email)}`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) setPendingTeachers(prev => prev.filter(t => t.email !== email));
+    } catch (err) { console.error(err); }
   };
 
   // Create User Account
@@ -551,7 +598,59 @@ function AdminDashboard() {
         {/* USER MANAGEMENT TAB */}
         {activeTab === "users" && (
           <div className="space-y-8">
+
+            {/* ─── Pending Teacher Approvals ─── */}
+            {(pendingTeachers.length > 0 || loadingPending) && (
+              <div className="bg-yellow-50 dark:bg-yellow-500/5 border border-yellow-400/40 rounded-3xl p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-2xl bg-yellow-500/20 flex items-center justify-center">
+                    <span className="text-yellow-500 text-xl">⏳</span>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-medium text-gray-900 dark:text-white">Pending Teacher Approvals</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">These teachers registered and are waiting for your approval to log in.</p>
+                  </div>
+                  <span className="ml-auto bg-yellow-400/20 text-yellow-500 border border-yellow-400/30 text-sm px-3 py-1 rounded-full font-medium">
+                    {pendingTeachers.length} pending
+                  </span>
+                </div>
+
+                {loadingPending ? (
+                  <p className="text-gray-500 dark:text-gray-400 text-sm">Loading pending approvals...</p>
+                ) : (
+                  <div className="space-y-3">
+                    {pendingTeachers.map((t) => (
+                      <div key={t.email} className="flex items-center justify-between bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">{t.full_name}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t.email}</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                            Registered: {t.registered_at || "Recently"} · School: {t.school_name}
+                          </p>
+                        </div>
+                        <div className="flex gap-3 ml-6">
+                          <button
+                            onClick={() => handleApproveTeacher(t.email)}
+                            className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm transition-all"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => handleRejectTeacher(t.email)}
+                            className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-sm transition-all"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Create account form */}
+
             <form onSubmit={handleCreateUser} className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 space-y-6">
               <h2 className="text-2xl font-light">Register Student or Teacher Account</h2>
               <div className="grid md:grid-cols-3 gap-6">
