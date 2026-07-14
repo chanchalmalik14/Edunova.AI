@@ -32,8 +32,11 @@ import {
   Shield
 } from "lucide-react";
 
+import { useTheme } from "../context/ThemeContext";
+
 function AdminDashboard() {
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   const [adminName, setAdminName] = useState("");
   const [activeTab, setActiveTab] = useState("overview"); // overview, users, classes, content, announcements, settings
@@ -810,35 +813,35 @@ function AdminDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-black text-white flex overflow-hidden relative">
+    <div className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-white flex overflow-hidden relative">
       {/* Background Glow */}
-      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/10 blur-[150px] rounded-full" />
-      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-purple-500/10 blur-[150px] rounded-full" />
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/5 dark:bg-blue-500/10 blur-[150px] rounded-full" />
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-purple-500/5 dark:bg-purple-500/10 blur-[150px] rounded-full" />
 
       {/* SIDEBAR */}
-      <div className="w-72 bg-white/[0.03] border-r border-white/10 p-6 hidden md:flex flex-col justify-between relative z-10 backdrop-blur-2xl">
+      <div className="w-72 bg-white dark:bg-white/[0.03] border-r border-gray-200 dark:border-white/10 p-6 hidden md:flex flex-col justify-between relative z-10 backdrop-blur-2xl">
         <div>
           {/* Logo */}
-          <h1 className="text-3xl font-light">
+          <h1 className="text-3xl font-light text-gray-900 dark:text-white">
             Edunova
-            <span className="text-blue-400 font-semibold">.AI</span>
+            <span className="text-blue-500 font-semibold">.AI</span>
           </h1>
 
           {/* Admin Card */}
-          <div className="mt-8 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-white/10 rounded-3xl p-5">
+          <div className="mt-8 bg-gradient-to-br from-blue-500/5 to-purple-500/5 dark:from-blue-500/10 dark:to-purple-500/10 border border-gray-200 dark:border-white/10 rounded-3xl p-5">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center justify-center text-lg font-bold">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-500 dark:text-blue-400 border border-blue-500/20 dark:border-blue-500/30 flex items-center justify-center text-lg font-bold">
                 {adminName?.charAt(0).toUpperCase() || "A"}
               </div>
               <div className="min-w-0">
-                <h3 className="text-md font-medium truncate">{adminName}</h3>
+                <h3 className="text-md font-medium truncate text-gray-900 dark:text-white">{adminName}</h3>
                 <p className="text-gray-500 text-xs mt-0.5">Administrator</p>
               </div>
             </div>
           </div>
 
           {/* MENU */}
-          <div className="mt-10 flex flex-col gap-2 text-gray-300">
+          <div className="mt-10 flex flex-col gap-2 text-gray-600 dark:text-gray-300">
             {[
               { id: "overview", label: "Dashboard Overview", icon: <LayoutDashboard size={18} /> },
               { id: "users", label: "User Management", icon: <Users size={18} /> },
@@ -854,8 +857,8 @@ function AdminDashboard() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-3 p-3.5 rounded-2xl transition cursor-pointer font-medium ${
                   activeTab === tab.id 
-                    ? "bg-white/5 border border-white/10 text-white" 
-                    : "hover:bg-white/5 text-gray-400 hover:text-white"
+                    ? "bg-blue-50 dark:bg-white/5 border border-blue-100 dark:border-white/10 text-blue-600 dark:text-white" 
+                    : "hover:bg-gray-100 dark:hover:bg-white/5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 }`}
               >
                 {tab.icon}
@@ -924,54 +927,56 @@ function AdminDashboard() {
           <div className="space-y-8">
 
             {/* ─── Pending Teacher Approvals ─── */}
-            {(pendingTeachers.length > 0 || loadingPending) && (
-              <div className="bg-yellow-50 dark:bg-yellow-500/5 border border-yellow-400/40 rounded-3xl p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-2xl bg-yellow-500/20 flex items-center justify-center">
-                    <span className="text-yellow-500 text-xl">⏳</span>
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-medium text-gray-900 dark:text-white">Pending Teacher Approvals</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">These teachers registered and are waiting for your approval to log in.</p>
-                  </div>
-                  <span className="ml-auto bg-yellow-400/20 text-yellow-500 border border-yellow-400/30 text-sm px-3 py-1 rounded-full font-medium">
-                    {pendingTeachers.length} pending
-                  </span>
+            <div className="bg-yellow-50 dark:bg-yellow-500/5 border border-yellow-400/40 rounded-3xl p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-2xl bg-yellow-500/20 flex items-center justify-center">
+                  <span className="text-yellow-500 text-xl">⏳</span>
                 </div>
-
-                {loadingPending ? (
-                  <p className="text-gray-500 dark:text-gray-400 text-sm">Loading pending approvals...</p>
-                ) : (
-                  <div className="space-y-3">
-                    {pendingTeachers.map((t) => (
-                      <div key={t.email} className="flex items-center justify-between bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4">
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">{t.full_name}</p>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t.email}</p>
-                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                            Registered: {t.registered_at || "Recently"} · School: {t.school_name}
-                          </p>
-                        </div>
-                        <div className="flex gap-3 ml-6">
-                          <button
-                            onClick={() => handleApproveTeacher(t.email)}
-                            className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm transition-all"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => handleRejectTeacher(t.email)}
-                            className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-sm transition-all"
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div>
+                  <h2 className="text-xl font-medium text-gray-900 dark:text-white">Pending Teacher Approvals</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">These teachers registered and are waiting for your approval to log in.</p>
+                </div>
+                <span className="ml-auto bg-yellow-400/20 text-yellow-500 border border-yellow-400/30 text-sm px-3 py-1 rounded-full font-medium">
+                  {pendingTeachers.length} pending
+                </span>
               </div>
-            )}
+
+              {loadingPending ? (
+                <p className="text-gray-500 dark:text-gray-400 text-sm">Loading pending approvals...</p>
+              ) : pendingTeachers.length === 0 ? (
+                <p className="text-gray-500 dark:text-gray-400 text-sm italic">No pending teacher registration requests at this time.</p>
+              ) : (
+                <div className="space-y-3">
+                  {pendingTeachers.map((t) => (
+                    <div key={t.email} className="flex items-center justify-between bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4">
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">{t.full_name}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{t.email}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                          Registered: {t.registered_at || "Recently"} · School: {t.school_name}
+                        </p>
+                      </div>
+                      <div className="flex gap-3 ml-6">
+                        <button
+                          onClick={() => handleApproveTeacher(t.email)}
+                          className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-xl text-sm transition-all"
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleRejectTeacher(t.email)}
+                          className="px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-sm transition-all"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Create account form */}
 
             {/* Create account form */}
 
@@ -979,71 +984,71 @@ function AdminDashboard() {
               <h2 className="text-2xl font-light">Register Student or Teacher Account</h2>
               <div className="grid md:grid-cols-3 gap-6">
                 <div>
-                  <label className="block mb-2 text-sm text-gray-400">Full Name</label>
+                  <label className="block mb-2 text-sm text-gray-500 dark:text-gray-400">Full Name</label>
                   <input
                     type="text"
                     required
                     value={userForm.full_name}
                     onChange={(e) => setUserForm({ ...userForm, full_name: e.target.value })}
-                    className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500"
+                    className="w-full bg-gray-50 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600"
                     placeholder="Arpita"
                   />
                 </div>
                 <div>
-                  <label className="block mb-2 text-sm text-gray-400">Email Address</label>
+                  <label className="block mb-2 text-sm text-gray-500 dark:text-gray-400">Email Address</label>
                   <input
                     type="email"
                     required
                     value={userForm.email}
                     onChange={(e) => setUserForm({ ...userForm, email: e.target.value })}
-                    className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500"
+                    className="w-full bg-gray-50 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600"
                     placeholder="arpita@gmail.com"
                   />
                 </div>
                 <div>
-                  <label className="block mb-2 text-sm text-gray-400">Account Password</label>
+                  <label className="block mb-2 text-sm text-gray-500 dark:text-gray-400">Account Password</label>
                   <input
                     type="password"
                     required
                     value={userForm.password}
                     onChange={(e) => setUserForm({ ...userForm, password: e.target.value })}
-                    className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500"
-                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢"
+                    className="w-full bg-gray-50 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600"
+                    placeholder="••••••"
                   />
                 </div>
                 <div>
-                  <label className="block mb-2 text-sm text-gray-400">Role Privilege</label>
+                  <label className="block mb-2 text-sm text-gray-500 dark:text-gray-400">Role Privilege</label>
                   <select
                     value={userForm.role}
                     onChange={(e) => setUserForm({ ...userForm, role: e.target.value })}
-                    className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 text-gray-300"
+                    className="w-full bg-gray-50 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 text-gray-900 dark:text-gray-100"
                   >
-                    <option value="student" className="bg-gray-900">Student</option>
-                    <option value="teacher" className="bg-gray-900">Teacher</option>
-                    <option value="parent" className="bg-gray-900">Parent</option>
+                    <option value="student" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">Student</option>
+                    <option value="teacher" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">Teacher</option>
+                    <option value="parent" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">Parent</option>
                   </select>
                 </div>
                 {userForm.role !== "admin" && userForm.role !== "parent" && (
                   <div>
-                    <label className="block mb-2 text-sm text-gray-400">
+                    <label className="block mb-2 text-sm text-gray-500 dark:text-gray-400">
                       Assign Class {userForm.role === "teacher" ? "(Teacher's class)" : ""}
                     </label>
                     <select
                       value={userForm.student_class}
                       onChange={(e) => setUserForm({ ...userForm, student_class: e.target.value })}
-                      className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 text-gray-300"
+                      className="w-full bg-gray-50 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 text-gray-900 dark:text-gray-100"
                     >
-                      <option value="" className="bg-gray-900">-- Select Class --</option>
-                      <option value="9th" className="bg-gray-900">9th Grade</option>
-                      <option value="10th" className="bg-gray-900">10th Grade</option>
-                      <option value="11th" className="bg-gray-900">11th Grade</option>
-                      <option value="12th" className="bg-gray-900">12th Grade</option>
+                      <option value="" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">-- Select Class --</option>
+                      <option value="9th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">9th Grade</option>
+                      <option value="10th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">10th Grade</option>
+                      <option value="11th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">11th Grade</option>
+                      <option value="12th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">12th Grade</option>
                     </select>
                   </div>
                 )}
 
               </div>
-              <button type="submit" className="bg-blue-500 hover:bg-blue-600 transition px-8 py-3.5 rounded-2xl font-semibold flex items-center gap-2">
+              <button type="submit" className="bg-blue-500 hover:bg-blue-600 transition px-8 py-3.5 rounded-2xl font-semibold flex items-center gap-2 text-white">
                 <UserPlus size={18} /> Add Account
               </button>
             </form>
@@ -1096,15 +1101,15 @@ function AdminDashboard() {
               <h3 className="text-xl font-light">Reset Student or Teacher Password</h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block mb-2 text-sm text-gray-400">Email Address</label>
-                  <input type="email" required value={resetPasswordEmail} onChange={(e)=>setResetPasswordEmail(e.target.value)} className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500" placeholder="user@school.edu" />
+                  <label className="block mb-2 text-sm text-gray-500 dark:text-gray-400">Email Address</label>
+                  <input type="email" required value={resetPasswordEmail} onChange={(e)=>setResetPasswordEmail(e.target.value)} className="w-full bg-gray-50 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600" placeholder="user@school.edu" />
                 </div>
                 <div>
-                  <label className="block mb-2 text-sm text-gray-400">New Password</label>
-                  <input type="password" required value={resetPasswordValue} onChange={(e)=>setResetPasswordValue(e.target.value)} className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500" />
+                  <label className="block mb-2 text-sm text-gray-500 dark:text-gray-400">New Password</label>
+                  <input type="password" required value={resetPasswordValue} onChange={(e)=>setResetPasswordValue(e.target.value)} className="w-full bg-gray-50 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600" />
                 </div>
               </div>
-              <button type="submit" className="bg-purple-500 hover:bg-purple-600 transition px-6 py-3 rounded-2xl font-semibold flex items-center gap-2"><KeyRound size={18}/> Reset Password</button>
+              <button type="submit" className="bg-purple-500 hover:bg-purple-600 transition px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 text-white"><KeyRound size={18}/> Reset Password</button>
             </form>
 
             <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 space-y-6">
