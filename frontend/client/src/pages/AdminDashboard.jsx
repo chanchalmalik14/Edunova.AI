@@ -121,6 +121,8 @@ function AdminDashboard() {
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [parents, setParents] = useState([]);
   const [loadingParents, setLoadingParents] = useState(false);
+  const [reportsData, setReportsData] = useState(null);
+  const [loadingReports, setLoadingReports] = useState(false);
 
   const [examForm, setExamForm] = useState({ class_name: "", subject: "", date: "", time: "", marks: "" });
   const [timetableForm, setTimetableForm] = useState({ class_name: "", day: "", subject: "", time: "", teacher: "" });
@@ -165,6 +167,7 @@ function AdminDashboard() {
     }
     if (activeTab === "reports") {
       fetchAnalytics();
+      fetchReportsData();
     }
     if (activeTab === "announcements") fetchAnnouncements();
   }, [activeTab, userRoleFilter]);
@@ -441,6 +444,22 @@ function AdminDashboard() {
         alert(data.detail || "Failed to approve teacher");
       }
     } catch (err) { console.error(err); }
+  };
+
+  const fetchReportsData = async () => {
+    setLoadingReports(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://127.0.0.1:8000/admin/reports-analytics", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) setReportsData(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingReports(false);
+    }
   };
 
   // Reject Teacher
@@ -857,28 +876,6 @@ function AdminDashboard() {
         {/* OVERVIEW TAB */}
         {activeTab === "overview" && (
           <div className="space-y-12">
-            {/* Hero Card */}
-            <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-[36px] p-8 md:p-10 backdrop-blur-2xl flex flex-col xl:flex-row gap-8 justify-between items-start xl:items-center">
-              <div>
-                <div className="flex items-center gap-2 text-blue-400">
-                  <Sparkles size={18} />
-                  <span className="uppercase tracking-[3px] text-xs font-bold">Control Console</span>
-                </div>
-                <h1 className="text-5xl font-light mt-4">EduNova Platform Admin</h1>
-                <p className="text-gray-400 text-md mt-4 max-w-xl">
-                  Manage teachers, student databases, configurations, and review system usage dynamically.
-                </p>
-              </div>
-              <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-white/10 rounded-3xl p-6 min-w-[250px]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400 text-sm">System Status</span>
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-ping" />
-                </div>
-                <h2 className="text-3xl mt-4 font-semibold">Active</h2>
-                <p className="text-xs text-gray-500 mt-2">MongoDB database & Gemini APIs operational</p>
-              </div>
-            </div>
-
             {/* Metrics grid */}
             {loadingAnalytics ? (
               <p className="text-gray-400 text-center">Loading live stats...</p>
@@ -1775,80 +1772,84 @@ function AdminDashboard() {
               <p className="text-sm text-gray-400">Review student performance, exam statistics, and AI engagement indices.</p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Student Performance & Subject Breakdown */}
-              <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 space-y-6">
-                <h3 className="text-xl font-medium text-blue-400">Subject-wise Academic Performance</h3>
-                <div className="space-y-4">
-                  {[
-                    { sub: "Mathematics", pct: 82, color: "bg-blue-400" },
-                    { sub: "Science & Biology", pct: 89, color: "bg-green-400" },
-                    { sub: "English Literature", pct: 91, color: "bg-yellow-400" },
-                    { sub: "Social Studies & History", pct: 85, color: "bg-purple-400" }
-                  ].map((item, i) => (
-                    <div key={i} className="space-y-1.5">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-300 font-medium">{item.sub}</span>
-                        <span className="text-gray-400">{item.pct}% average score</span>
-                      </div>
-                      <div className="w-full h-2.5 bg-white/10 rounded-full overflow-hidden">
-                        <div className={`h-full ${item.color}`} style={{ width: `${item.pct}%` }} />
-                      </div>
+            {loadingReports || !reportsData ? (
+              <p className="text-gray-400 text-center py-12">Generating platform reports dynamically from database...</p>
+            ) : (
+              <>
+                <div className="grid md:grid-cols-2 gap-8">
+                  {/* Student Performance & Subject Breakdown */}
+                  <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 space-y-6">
+                    <h3 className="text-xl font-medium text-blue-400">Subject-wise Academic Performance</h3>
+                    <div className="space-y-4">
+                      {reportsData.subject_performance?.map((item, i) => {
+                        const colors = ["bg-blue-400", "bg-green-400", "bg-yellow-400", "bg-purple-400"];
+                        return (
+                          <div key={i} className="space-y-1.5">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-300 font-medium">{item.subject}</span>
+                              <span className="text-gray-400">{item.percentage}% average score</span>
+                            </div>
+                            <div className="w-full h-2.5 bg-white/10 rounded-full overflow-hidden">
+                              <div className={`h-full ${colors[i % colors.length]}`} style={{ width: `${item.percentage}%` }} />
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* AI Usage Tracker */}
-              <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 space-y-6">
-                <h3 className="text-xl font-medium text-purple-400">AI Assistance & Student Activity</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center bg-white/5 border border-white/10 rounded-2xl p-4">
-                    <div>
-                      <p className="text-xs text-gray-400 uppercase tracking-wider">Total AI Notes Queries</p>
-                      <p className="text-2xl font-semibold mt-1">1,420</p>
-                    </div>
-                    <span className="text-xs bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2.5 py-1 rounded-full font-semibold">
-                      Active
-                    </span>
                   </div>
-                  <div className="flex justify-between items-center bg-white/5 border border-white/10 rounded-2xl p-4">
-                    <div>
-                      <p className="text-xs text-gray-400 uppercase tracking-wider">AI Quiz Generated</p>
-                      <p className="text-2xl font-semibold mt-1">386 Quizzes</p>
-                    </div>
-                    <span className="text-xs bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2.5 py-1 rounded-full font-semibold">
-                      Active
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 leading-relaxed">
-                    AI usage represents the total API prompts generated by students utilizing Edunova AI summaries.
-                  </p>
-                </div>
-              </div>
-            </div>
 
-            {/* Exam Reports Summary */}
-            <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8">
-              <h3 className="text-xl font-medium mb-6">Examination Results summary</h3>
-              <div className="grid md:grid-cols-3 gap-6 text-sm text-gray-300">
-                <div className="rounded-2xl border border-white/10 p-5 bg-white/[0.01]">
-                  <p className="text-gray-400 mb-1 font-medium">Exam Passing Rate</p>
-                  <p className="text-3xl font-semibold text-green-400">94.2%</p>
-                  <p className="text-xs text-gray-500 mt-2">Target passing threshold set at 40 marks</p>
+                  {/* AI Usage Tracker */}
+                  <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 space-y-6">
+                    <h3 className="text-xl font-medium text-purple-400">AI Assistance & Student Activity</h3>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center bg-white/5 border border-white/10 rounded-2xl p-4">
+                        <div>
+                          <p className="text-xs text-gray-400 uppercase tracking-wider">Total AI Notes Queries</p>
+                          <p className="text-2xl font-semibold mt-1">{reportsData.ai_usage?.notes_queries}</p>
+                        </div>
+                        <span className="text-xs bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2.5 py-1 rounded-full font-semibold">
+                          Active
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center bg-white/5 border border-white/10 rounded-2xl p-4">
+                        <div>
+                          <p className="text-xs text-gray-400 uppercase tracking-wider">AI Quiz Generated</p>
+                          <p className="text-2xl font-semibold mt-1">{reportsData.ai_usage?.quizzes_generated} Quizzes</p>
+                        </div>
+                        <span className="text-xs bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2.5 py-1 rounded-full font-semibold">
+                          Active
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 leading-relaxed">
+                        AI usage represents calculated prompt tokens based on notes uploads and student interactive quiz registrations.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="rounded-2xl border border-white/10 p-5 bg-white/[0.01]">
-                  <p className="text-gray-400 mb-1 font-medium">Top Performing Grade</p>
-                  <p className="text-3xl font-semibold text-blue-400">Class 10th</p>
-                  <p className="text-xs text-gray-500 mt-2">Class average score of 89.5%</p>
+
+                {/* Exam Reports Summary */}
+                <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8">
+                  <h3 className="text-xl font-medium mb-6">Examination Results summary</h3>
+                  <div className="grid md:grid-cols-3 gap-6 text-sm text-gray-300">
+                    <div className="rounded-2xl border border-white/10 p-5 bg-white/[0.01]">
+                      <p className="text-gray-400 mb-1 font-medium">Exam Passing Rate</p>
+                      <p className="text-3xl font-semibold text-green-400">{reportsData.passing_rate}%</p>
+                      <p className="text-xs text-gray-500 mt-2">Target passing threshold set at 40 marks</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 p-5 bg-white/[0.01]">
+                      <p className="text-gray-400 mb-1 font-medium">Top Performing Grade</p>
+                      <p className="text-3xl font-semibold text-blue-400">{reportsData.top_performing_grade}</p>
+                      <p className="text-xs text-gray-500 mt-2">Class highest score index</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 p-5 bg-white/[0.01]">
+                      <p className="text-gray-400 mb-1 font-medium">Student Performance Index</p>
+                      <p className="text-3xl font-semibold text-yellow-400">{reportsData.performance_index}</p>
+                      <p className="text-xs text-gray-500 mt-2">Average score of all classes: {reportsData.overall_avg}%</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="rounded-2xl border border-white/10 p-5 bg-white/[0.01]">
-                  <p className="text-gray-400 mb-1 font-medium">Student Performance Index</p>
-                  <p className="text-3xl font-semibold text-yellow-400">A- Grade</p>
-                  <p className="text-xs text-gray-500 mt-2">Average score of all classes: 84.1%</p>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         )}
       </div>
