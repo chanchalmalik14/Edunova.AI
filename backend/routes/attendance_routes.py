@@ -27,10 +27,12 @@ def submit_attendance(
     user_data = Depends(verify_token)
 ):
     teacher_only(user_data)
+    school_name = user_data.get("school_name", "")
 
     existing = attendance_collection.find_one({
         "date": request.date,
-        "class_name": request.class_name
+        "class_name": request.class_name,
+        "school_name": school_name
     })
 
     records_data = [rec.dict() for rec in request.records]
@@ -49,7 +51,8 @@ def submit_attendance(
             "date": request.date,
             "class_name": request.class_name,
             "records": records_data,
-            "marked_by": user_data["email"]
+            "marked_by": user_data["email"],
+            "school_name": school_name
         })
         message = "Attendance saved successfully"
 
