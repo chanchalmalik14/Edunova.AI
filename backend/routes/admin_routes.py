@@ -78,8 +78,8 @@ class CalendarEventSchema(BaseModel):
 
 
 def _get_school_filter(user_data):
-    school = user_data.get("school_name", "")
-    return {"school_name": school} if school else {}
+    school = user_data.get("school_name", "").strip()
+    return {"school_name": {"$regex": f"^{school}$", "$options": "i"}} if school else {}
 
 
 @router.get("/admin/analytics")
@@ -544,10 +544,10 @@ def create_admin(
 def get_pending_teachers(user_data=Depends(verify_token)):
     """Get all teachers awaiting approval for this admin's school."""
     admin_only(user_data)
-    school = user_data.get("school_name", "")
+    school = user_data.get("school_name", "").strip()
 
     pending = list(db["users"].find(
-        {"role": "teacher", "status": "pending", "school_name": school},
+        {"role": "teacher", "status": "pending", "school_name": {"$regex": f"^{school}$", "$options": "i"}},
         {"_id": 0, "password": 0}
     ))
     return {"pending_teachers": pending}
@@ -557,9 +557,9 @@ def get_pending_teachers(user_data=Depends(verify_token)):
 def approve_teacher(email: str, user_data=Depends(verify_token)):
     """Approve a pending teacher — they can now log in."""
     admin_only(user_data)
-    school = user_data.get("school_name", "")
+    school = user_data.get("school_name", "").strip()
 
-    teacher = db["users"].find_one({"email": email, "role": "teacher", "school_name": school})
+    teacher = db["users"].find_one({"email": email, "role": "teacher", "school_name": {"$regex": f"^{school}$", "$options": "i"}})
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found in your school.")
 
@@ -577,9 +577,9 @@ def approve_teacher(email: str, user_data=Depends(verify_token)):
 def reject_teacher(email: str, user_data=Depends(verify_token)):
     """Reject and remove a pending teacher registration."""
     admin_only(user_data)
-    school = user_data.get("school_name", "")
+    school = user_data.get("school_name", "").strip()
 
-    result = db["users"].delete_one({"email": email, "role": "teacher", "status": "pending", "school_name": school})
+    result = db["users"].delete_one({"email": email, "role": "teacher", "status": "pending", "school_name": {"$regex": f"^{school}$", "$options": "i"}})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Pending teacher not found.")
 
