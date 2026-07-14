@@ -6,6 +6,8 @@ from pydantic import BaseModel
 from typing import List, Optional
 from utils.hashing import hash_password
 from datetime import datetime
+from pathlib import Path
+from bson import ObjectId
 import os
 from dotenv import load_dotenv
 
@@ -20,21 +22,24 @@ class AdminAddUserRequest(BaseModel):
     email: str
     password: str
     role: str  # "student" or "teacher" or "admin"
-    school_name: Optional[str] = "Edunova High School"
+    school_name: Optional[str] = None
     student_class: Optional[str] = ""
 
 
 class AdminUpdateUserRequest(BaseModel):
-    full_name: str
-    role: str
+    full_name: Optional[str] = None
+    role: Optional[str] = None
     student_class: Optional[str] = ""
-    school_name: Optional[str] = ""
+    school_name: Optional[str] = None
+    password: Optional[str] = None
 
 
 class ClassConfigSchema(BaseModel):
     class_name: str
     sections: List[str]
     subjects: List[str]
+    class_teacher: Optional[str] = ""
+    subject_teachers: Optional[List[str]] = []
 
 
 class AnnouncementSchema(BaseModel):
@@ -43,21 +48,62 @@ class AnnouncementSchema(BaseModel):
     target_group: str  # "all" or "9th", "10th", etc.
 
 
+class ExamSchema(BaseModel):
+    class_name: str
+    subject: str
+    date: str
+    time: str
+    marks: int
+
+
+class TimetableSchema(BaseModel):
+    class_name: str
+    day: str
+    subject: str
+    time: str
+    teacher: str
+
+
+class SyllabusSchema(BaseModel):
+    class_name: str
+    subject: str
+    chapters: str
+
+
+class CalendarEventSchema(BaseModel):
+    title: str
+    date: str
+    type: str  # "exam", "holiday", "event"
+    description: Optional[str] = ""
+
+
+def _get_school_filter(user_data):
+    school = user_data.get("school_name", "")
+    return {"school_name": school} if school else {}
+
+
 @router.get("/admin/analytics")
 def get_admin_analytics(user_data = Depends(verify_token)):
     admin_only(user_data)
+    school_filter = _get_school_filter(user_data)
 
-    total_students = db["users"].count_documents({"role": "student"})
-    total_teachers = db["users"].count_documents({"role": "teacher"})
-    total_users = total_students + total_teachers + db["users"].count_documents({"role": "admin"})
+    total_students = db["users"].count_documents({"role": "student", **school_filter})
+    total_teachers = db["users"].count_documents({"role": "teacher", **school_filter})
+    total_users = total_students + total_teachers + db["users"].count_documents({"role": "admin", **school_filter})
 
-    total_notes = db["notes"].count_documents({})
-    total_assignments = db["assignments"].count_documents({})
-    total_quizzes = db["quizzes"].count_documents({})
+    total_notes = db["notes"].count_documents(school_filter)
+    total_assignments = db["assignments"].count_documents(school_filter)
+    total_quizzes = db["quizzes"].count_documents(school_filter)
+    total_classes = db["classes"].count_documents(school_filter)
+    pending_assignments = db["assignments"].count_documents({"status": "pending", **school_filter})
 
-    recent_notes = list(db["notes"].find({}).sort("_id", -1).limit(3))
-    recent_assignments = list(db["assignments"].find({}).sort("_id", -1).limit(3))
-    recent_submissions = list(db["submissions"].find({}).sort("_id", -1).limit(3))
+    today = datetime.now().strftime("%Y-%m-%d")
+    attendance_today = db["attendance"].count_documents({"date": today, **school_filter})
+
+    recent_notes = list(db["notes"].find(school_filter).sort("_id", -1).limit(3))
+    recent_assignments = list(db["assignments"].find(school_filter).sort("_id", -1).limit(3))
+    recent_submissions = list(db["submissions"].find(school_filter).sort("_id", -1).limit(3))
+    recent_announcements = list(db["announcements"].find(school_filter).sort("_id", -1).limit(3))
 
     activities = []
     for n in recent_notes:
@@ -66,6 +112,8 @@ def get_admin_analytics(user_data = Depends(verify_token)):
         activities.append(f"📝 Assignment Created: '{a.get('title')}' for Subject {a.get('subject', '')}")
     for s in recent_submissions:
         activities.append(f"👨‍🎓 Assignment Submitted: '{s.get('assignment_title')}' by {s.get('student_email')}")
+    for ann in recent_announcements:
+        activities.append(f"📢 Announcement: '{ann.get('title')}'")
 
     return {
         "stats": {
@@ -74,23 +122,28 @@ def get_admin_analytics(user_data = Depends(verify_token)):
             "total_teachers": total_teachers,
             "total_notes": total_notes,
             "total_assignments": total_assignments,
-            "total_quizzes": total_quizzes
+            "total_quizzes": total_quizzes,
+            "total_classes": total_classes,
+            "pending_assignments": pending_assignments,
+            "attendance_today": attendance_today
         },
-        "recent_activity": activities[:5]
+        "recent_activity": activities[:8]
     }
 
 
 @router.get("/admin/get-teachers")
 def get_teachers(user_data = Depends(verify_token)):
     admin_only(user_data)
-    teachers = list(db["users"].find({"role": "teacher"}, {"_id": 0, "password": 0}))
+    school_filter = _get_school_filter(user_data)
+    teachers = list(db["users"].find({"role": "teacher", **school_filter}, {"_id": 0, "password": 0}))
     return {"teachers": teachers}
 
 
 @router.get("/admin/get-students")
 def get_students(user_data = Depends(verify_token)):
     admin_only(user_data)
-    students = list(db["users"].find({"role": "student"}, {"_id": 0, "password": 0}))
+    school_filter = _get_school_filter(user_data)
+    students = list(db["users"].find({"role": "student", **school_filter}, {"_id": 0, "password": 0}))
     return {"students": students}
 
 
@@ -102,14 +155,16 @@ def add_user(request: AdminAddUserRequest, user_data = Depends(verify_token)):
     if exists:
         raise HTTPException(status_code=400, detail="User with this email already exists")
 
+    school_name = request.school_name or user_data.get("school_name", "")
     hashed_pw = hash_password(request.password)
     db["users"].insert_one({
         "full_name": request.full_name,
         "email": request.email,
         "password": hashed_pw,
         "role": request.role.lower(),
-        "school_name": request.school_name,
-        "student_class": request.student_class
+        "school_name": school_name,
+        "student_class": request.student_class,
+        "status": "active"
     })
     return {"message": f"{request.role.capitalize()} registered successfully"}
 
@@ -118,19 +173,23 @@ def add_user(request: AdminAddUserRequest, user_data = Depends(verify_token)):
 def update_user(email: str, request: AdminUpdateUserRequest, user_data = Depends(verify_token)):
     admin_only(user_data)
 
-    user = db["users"].find_one({"email": email})
+    user = db["users"].find_one({"email": email, **_get_school_filter(user_data)})
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
-    db["users"].update_one(
-        {"email": email},
-        {"$set": {
-            "full_name": request.full_name,
-            "role": request.role.lower(),
-            "student_class": request.student_class,
-            "school_name": request.school_name
-        }}
-    )
+    update_data = {}
+    if request.full_name is not None:
+        update_data["full_name"] = request.full_name
+    if request.role is not None:
+        update_data["role"] = request.role.lower()
+    if request.student_class is not None:
+        update_data["student_class"] = request.student_class
+    if request.school_name is not None:
+        update_data["school_name"] = request.school_name
+    if request.password:
+        update_data["password"] = hash_password(request.password)
+
+    db["users"].update_one({"email": email}, {"$set": update_data})
     return {"message": "User updated successfully"}
 
 
@@ -141,24 +200,38 @@ def delete_user(email: str, user_data = Depends(verify_token)):
     if email == user_data["email"]:
         raise HTTPException(status_code=400, detail="Admin cannot self-delete")
 
-    result = db["users"].delete_one({"email": email})
+    result = db["users"].delete_one({"email": email, **_get_school_filter(user_data)})
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
 
     return {"message": "User deleted successfully"}
 
 
+@router.post("/admin/reset-password/{email}")
+def reset_password(email: str, new_password: str, user_data = Depends(verify_token)):
+    admin_only(user_data)
+    user = db["users"].find_one({"email": email, **_get_school_filter(user_data)})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    db["users"].update_one({"email": email}, {"$set": {"password": hash_password(new_password)}})
+    return {"message": "Password updated successfully"}
+
+
 @router.post("/admin/create-class")
 def create_class(request: ClassConfigSchema, user_data = Depends(verify_token)):
     admin_only(user_data)
+    school_filter = _get_school_filter(user_data)
 
-    exists = db["classes"].find_one({"class_name": request.class_name})
+    exists = db["classes"].find_one({"class_name": request.class_name, **school_filter})
     if exists:
         db["classes"].update_one(
             {"_id": exists["_id"]},
             {"$set": {
                 "sections": request.sections,
-                "subjects": request.subjects
+                "subjects": request.subjects,
+                "class_teacher": request.class_teacher or "",
+                "subject_teachers": request.subject_teachers or []
             }}
         )
         message = "Class updated successfully"
@@ -166,7 +239,10 @@ def create_class(request: ClassConfigSchema, user_data = Depends(verify_token)):
         db["classes"].insert_one({
             "class_name": request.class_name,
             "sections": request.sections,
-            "subjects": request.subjects
+            "subjects": request.subjects,
+            "class_teacher": request.class_teacher or "",
+            "subject_teachers": request.subject_teachers or [],
+            **school_filter
         })
         message = "Class created successfully"
 
@@ -175,7 +251,8 @@ def create_class(request: ClassConfigSchema, user_data = Depends(verify_token)):
 
 @router.get("/admin/get-classes")
 def get_classes(user_data = Depends(verify_token)):
-    classes = list(db["classes"].find({}, {"_id": 0}))
+    school_filter = _get_school_filter(user_data)
+    classes = list(db["classes"].find(school_filter, {"_id": 0}))
     return {"classes": classes}
 
 
@@ -189,13 +266,15 @@ def delete_class(class_name: str, user_data = Depends(verify_token)):
 @router.post("/admin/create-announcement")
 def create_announcement(request: AnnouncementSchema, user_data = Depends(verify_token)):
     admin_only(user_data)
+    school_filter = _get_school_filter(user_data)
 
     db["announcements"].insert_one({
         "title": request.title,
         "content": request.content,
         "target_group": request.target_group,
         "created_by": user_data["email"],
-        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M")
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        **school_filter
     })
     return {"message": "Announcement posted successfully"}
 
@@ -203,14 +282,16 @@ def create_announcement(request: AnnouncementSchema, user_data = Depends(verify_
 @router.get("/admin/get-announcements")
 def get_announcements(user_data = Depends(verify_token)):
     role = user_data.get("role")
+    school_filter = _get_school_filter(user_data)
 
     if role == "student":
         student_class = user_data.get("student_class", "")
         announcements = list(db["announcements"].find({
-            "target_group": {"$in": ["all", student_class]}
+            **school_filter,
+            "target_group": {"$in": ["all", student_class, "students"]}
         }, {"_id": 0}).sort("created_at", -1))
     else:
-        announcements = list(db["announcements"].find({}, {"_id": 0}).sort("created_at", -1))
+        announcements = list(db["announcements"].find(school_filter, {"_id": 0}).sort("created_at", -1))
 
     return {"announcements": announcements}
 
@@ -225,16 +306,26 @@ def delete_announcement(title: str, user_data = Depends(verify_token)):
 @router.get("/admin/get-content")
 def get_content(user_data = Depends(verify_token)):
     admin_only(user_data)
+    school_filter = _get_school_filter(user_data)
 
-    notes = list(db["notes"].find({}, {"_id": 0}))
-    assignments = list(db["assignments"].find({}, {"_id": 0}))
-    quizzes = list(db["quizzes"].find({}, {"_id": 0}))
+    notes = list(db["notes"].find(school_filter, {"_id": 0}))
+    assignments = list(db["assignments"].find(school_filter, {"_id": 0}))
+    quizzes = list(db["quizzes"].find(school_filter, {"_id": 0}))
 
     return {
         "notes": notes,
         "assignments": assignments,
         "quizzes": quizzes
     }
+
+
+@router.get("/admin/attendance-summary")
+def get_attendance_summary(user_data = Depends(verify_token)):
+    admin_only(user_data)
+    school_filter = _get_school_filter(user_data)
+
+    records = list(db["attendance"].find(school_filter, {"_id": 0}).sort("date", -1))
+    return {"attendance": records}
 
 
 # ═══════════════════════════════════════════════════════════
@@ -258,11 +349,72 @@ class CreateSchoolRequest(BaseModel):
     contact_email: Optional[str] = ""
 
 
+class UpdateSchoolRequest(BaseModel):
+    name: str
+    city: Optional[str] = ""
+    contact_email: Optional[str] = ""
+    status: Optional[str] = "active"
+
+
+class SchoolStatusRequest(BaseModel):
+    status: str
+
+
 class CreateAdminRequest(BaseModel):
     full_name: str
     email: str
     password: str
     school_name: str
+
+
+def _get_school_query(school_id: str):
+    try:
+        return {"_id": ObjectId(school_id)}
+    except Exception:
+        return {"name": school_id}
+
+
+@router.get("/superadmin/overview")
+def get_super_admin_overview(_=Depends(verify_super_admin)):
+    """Collect high-level platform metrics for the super admin dashboard."""
+    total_schools = db["schools"].count_documents({})
+    total_students = db["users"].count_documents({"role": "student"})
+    total_teachers = db["users"].count_documents({"role": "teacher"})
+    total_admins = db["users"].count_documents({"role": "admin"})
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    active_users_today = db["users"].count_documents({"status": "active"})
+
+    ai_requests_today = 0
+    if "ai_requests" in db.list_collection_names():
+        ai_requests_today = db["ai_requests"].count_documents({"created_at": {"$regex": f"^{today}"}})
+
+    uploads_dir = Path("uploads")
+    storage_bytes = 0
+    if uploads_dir.exists():
+        for file_path in uploads_dir.rglob("*"):
+            if file_path.is_file():
+                storage_bytes += file_path.stat().st_size
+
+    return {
+        "stats": {
+            "total_schools": total_schools,
+            "total_students": total_students,
+            "total_teachers": total_teachers,
+            "total_admins": total_admins,
+            "active_users_today": active_users_today,
+            "ai_requests_today": ai_requests_today,
+            "revenue": 0,
+            "storage_usage_mb": round(storage_bytes / (1024 * 1024), 2)
+        }
+    }
+
+
+@router.get("/superadmin/admins")
+def list_admins(_=Depends(verify_super_admin)):
+    """List school admins created through the super admin flow."""
+    admins = list(db["users"].find({"role": "admin"}, {"_id": 0, "password": 0}))
+    return {"admins": admins}
 
 
 @router.post("/superadmin/create-school")
@@ -275,20 +427,78 @@ def create_school(
     if existing:
         raise HTTPException(status_code=400, detail=f"School '{request.name}' already exists.")
 
-    db["schools"].insert_one({
+    school_id = db["schools"].insert_one({
         "name": request.name,
         "city": request.city,
         "contact_email": request.contact_email,
+        "status": "active",
         "created_at": datetime.now().strftime("%Y-%m-%d %H:%M")
-    })
-    return {"message": f"School '{request.name}' created successfully."}
+    }).inserted_id
+    return {"message": f"School '{request.name}' created successfully.", "school_id": str(school_id)}
 
 
 @router.get("/superadmin/schools")
 def list_schools(_=Depends(verify_super_admin)):
     """List all schools registered on Edunova."""
-    schools = list(db["schools"].find({}, {"_id": 0}))
-    return {"schools": schools}
+    schools = list(db["schools"].find({}, {"_id": 1, "name": 1, "city": 1, "contact_email": 1, "status": 1, "created_at": 1}))
+    formatted = []
+    for school in schools:
+        formatted.append({
+            "id": str(school.get("_id")),
+            "name": school.get("name"),
+            "city": school.get("city", ""),
+            "contact_email": school.get("contact_email", ""),
+            "status": school.get("status", "active"),
+            "created_at": school.get("created_at", "")
+        })
+    return {"schools": formatted}
+
+
+@router.put("/superadmin/schools/{school_id}")
+def update_school(school_id: str, request: UpdateSchoolRequest, _=Depends(verify_super_admin)):
+    """Update a school's profile details."""
+    school_query = _get_school_query(school_id)
+    result = db["schools"].update_one(school_query, {"$set": {
+        "name": request.name,
+        "city": request.city,
+        "contact_email": request.contact_email,
+        "status": request.status or "active"
+    }})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="School not found.")
+    return {"message": "School updated successfully."}
+
+
+@router.patch("/superadmin/schools/{school_id}/status")
+def update_school_status(school_id: str, request: SchoolStatusRequest, _=Depends(verify_super_admin)):
+    """Activate or suspend a school account."""
+    school_query = _get_school_query(school_id)
+    school = db["schools"].find_one(school_query)
+    if not school:
+        raise HTTPException(status_code=404, detail="School not found.")
+
+    db["schools"].update_one(school_query, {"$set": {"status": request.status}})
+    db["users"].update_many(
+        {"school_name": school.get("name")},
+        {"$set": {"status": request.status if request.status == "active" else "inactive"}}
+    )
+    return {"message": f"School status updated to {request.status}."}
+
+
+@router.delete("/superadmin/schools/{school_id}")
+def delete_school(school_id: str, _=Depends(verify_super_admin)):
+    """Delete a school and clear its linked admin/student records."""
+    school_query = _get_school_query(school_id)
+    school = db["schools"].find_one(school_query)
+    if not school:
+        raise HTTPException(status_code=404, detail="School not found.")
+
+    db["schools"].delete_one(school_query)
+    db["users"].update_many(
+        {"school_name": school.get("name")},
+        {"$set": {"school_name": "", "status": "inactive"}}
+    )
+    return {"message": "School deleted successfully."}
 
 
 @router.post("/superadmin/create-admin")
@@ -374,3 +584,155 @@ def reject_teacher(email: str, user_data=Depends(verify_token)):
         raise HTTPException(status_code=404, detail="Pending teacher not found.")
 
     return {"message": "Teacher registration rejected and removed."}
+
+
+# ═══════════════════════════════════════════════════════════
+# ADDITIONAL ADMIN ENDPOINTS FOR INTEGRATED LMS REVAMP
+# ═══════════════════════════════════════════════════════════
+
+@router.get("/admin/attendance-summary")
+def get_attendance_summary(user_data=Depends(verify_token)):
+    admin_only(user_data)
+    school_filter = _get_school_filter(user_data)
+    logs = list(db["attendance"].find(school_filter).sort("date", -1))
+    for log in logs:
+        log["_id"] = str(log["_id"])
+    return {"attendance": logs}
+
+
+@router.get("/admin/get-parents")
+def get_parents(user_data=Depends(verify_token)):
+    admin_only(user_data)
+    school_filter = _get_school_filter(user_data)
+    parents = list(db["users"].find({"role": "parent", **school_filter}, {"_id": 0, "password": 0}))
+    return {"parents": parents}
+
+
+# EXAMS
+@router.get("/admin/exams")
+def get_exams(user_data=Depends(verify_token)):
+    admin_only(user_data)
+    school_filter = _get_school_filter(user_data)
+    exams = list(db["exams"].find(school_filter))
+    for e in exams:
+        e["_id"] = str(e["_id"])
+    return {"exams": exams}
+
+
+@router.post("/admin/create-exam")
+def create_exam(request: ExamSchema, user_data=Depends(verify_token)):
+    admin_only(user_data)
+    school_filter = _get_school_filter(user_data)
+    db["exams"].insert_one({
+        "class_name": request.class_name,
+        "subject": request.subject,
+        "date": request.date,
+        "time": request.time,
+        "marks": request.marks,
+        **school_filter
+    })
+    return {"message": "Exam scheduled successfully"}
+
+
+@router.delete("/admin/delete-exam/{id}")
+def delete_exam(id: str, user_data=Depends(verify_token)):
+    admin_only(user_data)
+    db["exams"].delete_one({"_id": ObjectId(id)})
+    return {"message": "Exam deleted successfully"}
+
+
+# TIMETABLE
+@router.get("/admin/timetable")
+def get_timetable(user_data=Depends(verify_token)):
+    admin_only(user_data)
+    school_filter = _get_school_filter(user_data)
+    slots = list(db["timetable"].find(school_filter))
+    for s in slots:
+        s["_id"] = str(s["_id"])
+    return {"timetable": slots}
+
+
+@router.post("/admin/create-timetable")
+def create_timetable(request: TimetableSchema, user_data=Depends(verify_token)):
+    admin_only(user_data)
+    school_filter = _get_school_filter(user_data)
+    db["timetable"].insert_one({
+        "class_name": request.class_name,
+        "day": request.day,
+        "subject": request.subject,
+        "time": request.time,
+        "teacher": request.teacher,
+        **school_filter
+    })
+    return {"message": "Timetable slot added successfully"}
+
+
+@router.delete("/admin/delete-timetable/{id}")
+def delete_timetable(id: str, user_data=Depends(verify_token)):
+    admin_only(user_data)
+    db["timetable"].delete_one({"_id": ObjectId(id)})
+    return {"message": "Timetable slot deleted successfully"}
+
+
+# SYLLABUS
+@router.get("/admin/syllabus")
+def get_syllabus(user_data=Depends(verify_token)):
+    admin_only(user_data)
+    school_filter = _get_school_filter(user_data)
+    syllabi = list(db["syllabus"].find(school_filter))
+    for s in syllabi:
+        s["_id"] = str(s["_id"])
+    return {"syllabus": syllabi}
+
+
+@router.post("/admin/create-syllabus")
+def create_syllabus(request: SyllabusSchema, user_data=Depends(verify_token)):
+    admin_only(user_data)
+    school_filter = _get_school_filter(user_data)
+    db["syllabus"].insert_one({
+        "class_name": request.class_name,
+        "subject": request.subject,
+        "chapters": request.chapters,
+        **school_filter
+    })
+    return {"message": "Syllabus entry created"}
+
+
+@router.delete("/admin/delete-syllabus/{id}")
+def delete_syllabus(id: str, user_data=Depends(verify_token)):
+    admin_only(user_data)
+    db["syllabus"].delete_one({"_id": ObjectId(id)})
+    return {"message": "Syllabus entry deleted"}
+
+
+# CALENDAR
+@router.get("/admin/calendar")
+def get_calendar(user_data=Depends(verify_token)):
+    admin_only(user_data)
+    school_filter = _get_school_filter(user_data)
+    events = list(db["calendar"].find(school_filter))
+    for e in events:
+        e["_id"] = str(e["_id"])
+    return {"calendar": events}
+
+
+@router.post("/admin/create-calendar")
+def create_calendar(request: CalendarEventSchema, user_data=Depends(verify_token)):
+    admin_only(user_data)
+    school_filter = _get_school_filter(user_data)
+    db["calendar"].insert_one({
+        "title": request.title,
+        "date": request.date,
+        "type": request.type,
+        "description": request.description or "",
+        **school_filter
+    })
+    return {"message": "Calendar event added"}
+
+
+@router.delete("/admin/delete-calendar/{id}")
+def delete_calendar(id: str, user_data=Depends(verify_token)):
+    admin_only(user_data)
+    db["calendar"].delete_one({"_id": ObjectId(id)})
+    return {"message": "Calendar event deleted"}
+

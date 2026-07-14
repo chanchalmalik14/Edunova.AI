@@ -145,7 +145,7 @@ function App() {
         }
       />
 
-      {/* Analytics */}
+      {/* Analytics- */}
       <Route
         path="/analytics"
         element={
