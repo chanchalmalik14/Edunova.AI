@@ -78,7 +78,8 @@ class CalendarEventSchema(BaseModel):
 
 
 def _get_school_filter(user_data):
-    school = user_data.get("school_name", "").strip()
+    admin_db = db["users"].find_one({"email": user_data.get("email")})
+    school = admin_db.get("school_name", "").strip() if admin_db else ""
     return {"school_name": {"$regex": f"^{school}$", "$options": "i"}} if school else {}
 
 
@@ -544,7 +545,8 @@ def create_admin(
 def get_pending_teachers(user_data=Depends(verify_token)):
     """Get all teachers awaiting approval for this admin's school."""
     admin_only(user_data)
-    school = user_data.get("school_name", "").strip()
+    admin_db = db["users"].find_one({"email": user_data.get("email")})
+    school = admin_db.get("school_name", "").strip() if admin_db else ""
 
     pending = list(db["users"].find(
         {"role": "teacher", "status": "pending", "school_name": {"$regex": f"^{school}$", "$options": "i"}},
@@ -557,7 +559,8 @@ def get_pending_teachers(user_data=Depends(verify_token)):
 def approve_teacher(email: str, user_data=Depends(verify_token)):
     """Approve a pending teacher — they can now log in."""
     admin_only(user_data)
-    school = user_data.get("school_name", "").strip()
+    admin_db = db["users"].find_one({"email": user_data.get("email")})
+    school = admin_db.get("school_name", "").strip() if admin_db else ""
 
     teacher = db["users"].find_one({"email": email, "role": "teacher", "school_name": {"$regex": f"^{school}$", "$options": "i"}})
     if not teacher:
@@ -577,7 +580,8 @@ def approve_teacher(email: str, user_data=Depends(verify_token)):
 def reject_teacher(email: str, user_data=Depends(verify_token)):
     """Reject and remove a pending teacher registration."""
     admin_only(user_data)
-    school = user_data.get("school_name", "").strip()
+    admin_db = db["users"].find_one({"email": user_data.get("email")})
+    school = admin_db.get("school_name", "").strip() if admin_db else ""
 
     result = db["users"].delete_one({"email": email, "role": "teacher", "status": "pending", "school_name": {"$regex": f"^{school}$", "$options": "i"}})
     if result.deleted_count == 0:
