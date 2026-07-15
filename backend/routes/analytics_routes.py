@@ -10,8 +10,20 @@ def get_analytics(user_data = Depends(verify_token)):
     email = user_data.get("email")
 
     if role == "student":
+        student = db["users"].find_one({"email": email})
+        school = student.get("school_name", "").strip() if student else ""
+
+        # Fetch school quizzes to filter out old, stale, or external test-run result logs
+        school_quizzes = list(db["quizzes"].find(
+            {"school_name": {"$regex": f"^{school}$", "$options": "i"}}
+        ))
+        school_quiz_titles = [q["title"] for q in school_quizzes]
+
         # 1. Quizzes Completed
-        quiz_results = list(db["results"].find({"student_email": email}))
+        quiz_results = list(db["results"].find({
+            "student_email": email,
+            "quiz_title": {"$in": school_quiz_titles}
+        }))
         quizzes_completed = len(quiz_results)
         quiz_titles = [res.get("quiz_title") for res in quiz_results]
 
@@ -26,9 +38,12 @@ def get_analytics(user_data = Depends(verify_token)):
         # 3. Assignments Completed
         assignments_completed = db["submissions"].count_documents({"student_email": email})
 
-        # 4. Notes Available for student's class
+        # 4. Notes Available for student's class & school
         student_class = user_data.get("student_class")
-        notes_available = db["notes"].count_documents({"student_class": student_class})
+        notes_available = db["notes"].count_documents({
+            "student_class": student_class,
+            "school_name": {"$regex": f"^{school}$", "$options": "i"}
+        })
 
         return {
             "role": "student",
