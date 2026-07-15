@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
@@ -18,6 +18,7 @@ function RegisterPage() {
     email: "",
     school: "",
     className: "",
+    section: "",
     password: "",
   });
 
@@ -59,7 +60,8 @@ function RegisterPage() {
         body: JSON.stringify({
           full_name: formData.name,
           school_name: formData.school,
-          student_class: role === "Student" ? formData.className : "",
+          student_class: formData.className,
+          section: formData.section,
           email: formData.email,
           password: formData.password,
           role: role.toLowerCase()
@@ -280,13 +282,66 @@ function RegisterPage() {
               )}
             </div>
 
-            {/* Class (Students only) */}
+            {/* Class & Section (Students only) */}
             {role === "Student" && (
-              <div className="mt-6">
-                <p className="mb-3 text-gray-500 dark:text-gray-400">Class</p>
-                <div className={inputClass}>
-                  <GraduationCap className="text-gray-500" size={20} />
-                  <input type="text" name="className" placeholder="Enter your class (e.g. 10th)" value={formData.className} onChange={handleChange} required className={inputField} />
+              <div className="grid grid-cols-2 gap-4 mt-6">
+                <div>
+                  <p className="mb-3 text-gray-500 dark:text-gray-400">Class</p>
+                  <div className={inputClass}>
+                    <GraduationCap className="text-gray-500 shrink-0" size={20} />
+                    <select name="className" value={formData.className} onChange={handleChange} required className="w-full bg-transparent px-4 py-4 outline-none text-gray-900 dark:text-white">
+                      <option value="" disabled className="bg-gray-900">Select Class</option>
+                      <option value="9th" className="bg-gray-900">9th Grade</option>
+                      <option value="10th" className="bg-gray-900">10th Grade</option>
+                      <option value="11th" className="bg-gray-900">11th Grade</option>
+                      <option value="12th" className="bg-gray-900">12th Grade</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-3 text-gray-500 dark:text-gray-400">Section</p>
+                  <div className={inputClass}>
+                    <span className="text-gray-500 shrink-0">📍</span>
+                    <select name="section" value={formData.section} onChange={handleChange} required className="w-full bg-transparent px-4 py-4 outline-none text-gray-900 dark:text-white">
+                      <option value="" disabled className="bg-gray-900">Select Section</option>
+                      <option value="A" className="bg-gray-900">Section A</option>
+                      <option value="B" className="bg-gray-900">Section B</option>
+                      <option value="C" className="bg-gray-900">Section C</option>
+                      <option value="D" className="bg-gray-900">Section D</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Class & Section (Teachers only) */}
+            {role === "Teacher" && (
+              <div className="grid grid-cols-2 gap-4 mt-6">
+                <div>
+                  <p className="mb-3 text-gray-500 dark:text-gray-400">Assigned Class</p>
+                  <div className={inputClass}>
+                    <GraduationCap className="text-gray-500 shrink-0" size={20} />
+                    <select name="className" value={formData.className} onChange={handleChange} required className="w-full bg-transparent px-4 py-4 outline-none text-gray-900 dark:text-white">
+                      <option value="" disabled className="bg-gray-900">Select Class</option>
+                      <option value="9th" className="bg-gray-900">9th Grade</option>
+                      <option value="10th" className="bg-gray-900">10th Grade</option>
+                      <option value="11th" className="bg-gray-900">11th Grade</option>
+                      <option value="12th" className="bg-gray-900">12th Grade</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-3 text-gray-500 dark:text-gray-400">Assigned Section</p>
+                  <div className={inputClass}>
+                    <span className="text-gray-500 shrink-0">📍</span>
+                    <select name="section" value={formData.section} onChange={handleChange} required className="w-full bg-transparent px-4 py-4 outline-none text-gray-900 dark:text-white">
+                      <option value="" disabled className="bg-gray-900">Select Section</option>
+                      <option value="A" className="bg-gray-900">Section A</option>
+                      <option value="B" className="bg-gray-900">Section B</option>
+                      <option value="C" className="bg-gray-900">Section C</option>
+                      <option value="D" className="bg-gray-900">Section D</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             )}

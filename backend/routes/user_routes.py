@@ -74,6 +74,7 @@ def register_user(user: UserSchema):
         "full_name": user.full_name,
         "school_name": canonical_school_name,
         "student_class": user.student_class,
+        "section": user.section,
         "email": user.email,
         "password": hashed_pw,
         "role": user.role.lower(),
