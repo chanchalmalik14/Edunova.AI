@@ -73,10 +73,11 @@ function AdminDashboard() {
     password: "",
     role: "student",
     student_class: "",
+    section: "",
     school_name: ""
   });
   const [editingUserEmail, setEditingUserEmail] = useState("");
-  const [editingUserForm, setEditingUserForm] = useState({ full_name: "", role: "student", student_class: "", school_name: "", password: "" });
+  const [editingUserForm, setEditingUserForm] = useState({ full_name: "", role: "student", student_class: "", section: "", school_name: "", password: "" });
   const [resetPasswordEmail, setResetPasswordEmail] = useState("");
   const [resetPasswordValue, setResetPasswordValue] = useState("");
   const [attendanceSummary, setAttendanceSummary] = useState([]);
@@ -552,6 +553,7 @@ function AdminDashboard() {
           password: "",
           role: "student",
           student_class: "",
+          section: "",
           school_name: ""
         });
         fetchUsers();
@@ -643,6 +645,7 @@ function AdminDashboard() {
       full_name: user.full_name || "",
       role: user.role || "student",
       student_class: user.student_class || "",
+      section: user.section || "",
       school_name: user.school_name || "",
       password: ""
     });
@@ -664,7 +667,7 @@ function AdminDashboard() {
       if (res.ok) {
         alert(data.message || "User updated successfully");
         setEditingUserEmail("");
-        setEditingUserForm({ full_name: "", role: "student", student_class: "", school_name: "", password: "" });
+        setEditingUserForm({ full_name: "", role: "student", student_class: "", section: "", school_name: "", password: "" });
         fetchUsers();
       } else {
         alert(data.detail || "Unable to update user");
@@ -1150,22 +1153,41 @@ function AdminDashboard() {
                   </select>
                 </div>
                 {userForm.role !== "admin" && userForm.role !== "parent" && (
-                  <div>
-                    <label className="block mb-2 text-sm text-gray-500 dark:text-gray-400">
-                      Assign Class {userForm.role === "teacher" ? "(Teacher's class)" : ""}
-                    </label>
-                    <select
-                      value={userForm.student_class}
-                      onChange={(e) => setUserForm({ ...userForm, student_class: e.target.value })}
-                      className="w-full bg-gray-50 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 text-gray-900 dark:text-gray-100"
-                    >
-                      <option value="" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">-- Select Class --</option>
-                      <option value="9th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">9th Grade</option>
-                      <option value="10th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">10th Grade</option>
-                      <option value="11th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">11th Grade</option>
-                      <option value="12th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">12th Grade</option>
-                    </select>
-                  </div>
+                  <>
+                    <div>
+                      <label className="block mb-2 text-sm text-gray-500 dark:text-gray-400">
+                        Assign Class {userForm.role === "teacher" ? "(Teacher's class)" : ""}
+                      </label>
+                      <select
+                        value={userForm.student_class}
+                        onChange={(e) => setUserForm({ ...userForm, student_class: e.target.value })}
+                        className="w-full bg-gray-50 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 text-gray-900 dark:text-gray-100"
+                      >
+                        <option value="" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">-- Select Class --</option>
+                        <option value="9th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">9th Grade</option>
+                        <option value="10th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">10th Grade</option>
+                        <option value="11th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">11th Grade</option>
+                        <option value="12th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">12th Grade</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block mb-2 text-sm text-gray-500 dark:text-gray-400">
+                        Assign Section
+                      </label>
+                      <select
+                        value={userForm.section}
+                        onChange={(e) => setUserForm({ ...userForm, section: e.target.value })}
+                        className="w-full bg-gray-50 dark:bg-white/10 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 text-gray-900 dark:text-gray-100"
+                      >
+                        <option value="" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">-- Select Section --</option>
+                        <option value="A" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">Section A</option>
+                        <option value="B" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">Section B</option>
+                        <option value="C" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">Section C</option>
+                        <option value="D" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">Section D</option>
+                      </select>
+                    </div>
+                  </>
                 )}
 
               </div>
@@ -1218,16 +1240,28 @@ function AdminDashboard() {
                     </select>
                   </div>
                   {editingUserForm.role !== "admin" && editingUserForm.role !== "parent" && (
-                    <div>
-                      <label className="block mb-2 text-sm text-gray-400">Promote / Class Level</label>
-                      <select value={editingUserForm.student_class} onChange={(e)=>setEditingUserForm({...editingUserForm, student_class:e.target.value})} className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 text-gray-300">
-                        <option value="" className="bg-gray-900">-- Select Class --</option>
-                        <option value="9th" className="bg-gray-900">9th Grade</option>
-                        <option value="10th" className="bg-gray-900">10th Grade</option>
-                        <option value="11th" className="bg-gray-900">11th Grade</option>
-                        <option value="12th" className="bg-gray-900">12th Grade</option>
-                      </select>
-                    </div>
+                    <>
+                      <div>
+                        <label className="block mb-2 text-sm text-gray-400">Promote / Class Level</label>
+                        <select value={editingUserForm.student_class} onChange={(e)=>setEditingUserForm({...editingUserForm, student_class:e.target.value})} className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 text-gray-300">
+                          <option value="" className="bg-gray-900">-- Select Class --</option>
+                          <option value="9th" className="bg-gray-900">9th Grade</option>
+                          <option value="10th" className="bg-gray-900">10th Grade</option>
+                          <option value="11th" className="bg-gray-900">11th Grade</option>
+                          <option value="12th" className="bg-gray-900">12th Grade</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block mb-2 text-sm text-gray-400">Section</label>
+                        <select value={editingUserForm.section} onChange={(e)=>setEditingUserForm({...editingUserForm, section:e.target.value})} className="w-full bg-white/10 border border-white/10 rounded-2xl px-4 py-3 outline-none focus:border-blue-500 text-gray-300">
+                          <option value="" className="bg-gray-900">-- Select Section --</option>
+                          <option value="A" className="bg-gray-900">Section A</option>
+                          <option value="B" className="bg-gray-900">Section B</option>
+                          <option value="C" className="bg-gray-900">Section C</option>
+                          <option value="D" className="bg-gray-900">Section D</option>
+                        </select>
+                      </div>
+                    </>
                   )}
                   <div>
                     <label className="block mb-2 text-sm text-gray-400">Transfer School (School Name)</label>

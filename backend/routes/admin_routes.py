@@ -24,12 +24,14 @@ class AdminAddUserRequest(BaseModel):
     role: str  # "student" or "teacher" or "admin"
     school_name: Optional[str] = None
     student_class: Optional[str] = ""
+    section: Optional[str] = ""
 
 
 class AdminUpdateUserRequest(BaseModel):
     full_name: Optional[str] = None
     role: Optional[str] = None
     student_class: Optional[str] = ""
+    section: Optional[str] = ""
     school_name: Optional[str] = None
     password: Optional[str] = None
 
@@ -166,6 +168,7 @@ def add_user(request: AdminAddUserRequest, user_data = Depends(verify_token)):
         "role": request.role.lower(),
         "school_name": school_name,
         "student_class": request.student_class,
+        "section": request.section,
         "status": "active"
     })
     return {"message": f"{request.role.capitalize()} registered successfully"}
@@ -186,6 +189,8 @@ def update_user(email: str, request: AdminUpdateUserRequest, user_data = Depends
         update_data["role"] = request.role.lower()
     if request.student_class is not None:
         update_data["student_class"] = request.student_class
+    if request.section is not None:
+        update_data["section"] = request.section
     if request.school_name is not None:
         update_data["school_name"] = request.school_name
     if request.password:
