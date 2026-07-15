@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 
 function AINotesPage() {
   const [chats, setChats] = useState([]);
@@ -32,7 +32,9 @@ function AINotesPage() {
 
   const handleSend = async (customText = null) => {
     const textToSend = typeof customText === "string" ? customText : input;
-    if (!textToSend.trim()) return;
+    if (!textToSend.trim() && !image) return;
+
+    const currentImage = image;
 
     setInput("");
     setImage(null);
@@ -40,18 +42,18 @@ function AINotesPage() {
     let chatId = activeChatId;
 
     if (!chatId) {
-      chatId = createChatIfNeeded(textToSend.slice(0, 20));
+      chatId = createChatIfNeeded(textToSend ? textToSend.slice(0, 20) : "Attached File");
     }
 
     const userMsg = {
       role: "user",
       text: textToSend,
-      image,
+      image: currentImage,
     };
 
     const aiMsg = {
       role: "ai",
-      text: "âŒ› Generating AI Notes...",
+      text: "⌛ Generating AI Notes...",
     };
 
     setChats((prev) =>
@@ -62,7 +64,7 @@ function AINotesPage() {
               messages: [...chat.messages, userMsg, aiMsg],
               title:
                 chat.title === "New Chat"
-                  ? textToSend.slice(0, 25)
+                  ? (textToSend ? textToSend.slice(0, 25) : "Attached File")
                   : chat.title,
             }
           : chat
@@ -71,14 +73,30 @@ function AINotesPage() {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://127.0.0.1:8000/generate-summary", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ text: textToSend })
-      });
+      let response;
+      if (currentImage) {
+        const formData = new FormData();
+        formData.append("file", currentImage);
+        if (textToSend) {
+          formData.append("prompt", textToSend);
+        }
+        response = await fetch("http://127.0.0.1:8000/generate-file-summary", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          },
+          body: formData
+        });
+      } else {
+        response = await fetch("http://127.0.0.1:8000/generate-summary", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ text: textToSend })
+        });
+      }
 
       const data = await response.json();
 
@@ -109,7 +127,7 @@ function AINotesPage() {
             const placeholderIndex = updatedMessages.length - 1;
             updatedMessages[placeholderIndex] = {
               role: "ai",
-              text: `âŒ Error: ${err.message || "Could not connect to AI service."}`,
+              text: `❌ Error: ${err.message || "Could not connect to AI service."}`,
             };
             return { ...chat, messages: updatedMessages };
           }

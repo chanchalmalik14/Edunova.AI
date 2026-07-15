@@ -20,13 +20,14 @@ def create_quiz(
     quiz: QuizSchema,
     user_data=Depends(verify_token)
 ):
-
-    # Teacher only access
     teacher_only(user_data)
 
     quiz_data = quiz.dict()
-
     quiz_data["created_by"] = user_data["email"]
+
+    teacher = db["users"].find_one({"email": user_data["email"]})
+    school_name = teacher.get("school_name", "") if teacher else ""
+    quiz_data["school_name"] = school_name
 
     quiz_collection.insert_one(quiz_data)
 
@@ -40,9 +41,14 @@ def create_quiz(
 def get_quizzes(
     user_data=Depends(verify_token)
 ):
+    student = db["users"].find_one({"email": user_data["email"]})
+    school_name = student.get("school_name", "") if student else ""
 
     quizzes = list(
-        quiz_collection.find({}, {"_id": 0})
+        quiz_collection.find(
+            {"school_name": {"$regex": f"^{school_name}$", "$options": "i"}},
+            {"_id": 0}
+        )
     )
 
     return {

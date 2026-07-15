@@ -6,11 +6,11 @@ from fastapi import (
     Form
 )
 from fastapi.responses import FileResponse
+from typing import Optional
 from ai.gemini_service import (
-    generate_summary
+    generate_summary,
+    generate_multimodal_summary
 )
-from fastapi.responses import FileResponse
-
 import shutil
 import os
 
@@ -52,20 +52,18 @@ def upload_note(
         shutil.copyfileobj(file.file, buffer)
 
     # Save metadata in MongoDB
+    teacher = db["users"].find_one({"email": user_data["email"]})
+    school_name = teacher.get("school_name", "") if teacher else ""
+
     note_data = {
-
-    "title": title,
-
-    "subject": subject,
-
-    "student_class": student_class,
-
-    "filename": file.filename,
-
-    "uploaded_by": user_data["email"],
-
-    "file_path": file_path
-}
+        "title": title,
+        "subject": subject,
+        "student_class": student_class,
+        "filename": file.filename,
+        "uploaded_by": user_data["email"],
+        "school_name": school_name,
+        "file_path": file_path
+    }
 
     notes_collection.insert_one(note_data)
 
@@ -73,23 +71,23 @@ def upload_note(
         "message": "Note uploaded successfully",
         "filename": file.filename
     }
+
+
 @router.get("/get-notes")
 def get_notes(
     user_data = Depends(verify_token)
 ):
-
     student_class = user_data.get("student_class")
+    student = db["users"].find_one({"email": user_data["email"]})
+    school_name = student.get("school_name", "") if student else ""
 
     notes = list(
-
         notes_collection.find(
             {
-                "student_class": student_class
+                "student_class": student_class,
+                "school_name": {"$regex": f"^{school_name}$", "$options": "i"}
             },
-
-            {
-                "_id": 0
-            }
+            {"_id": 0}
         )
     )
 
@@ -116,6 +114,30 @@ def generate_note_summary(
         return {
             "error": str(e)
         }
+
+
+@router.post("/generate-file-summary")
+async def generate_file_summary(
+    file: UploadFile = File(...),
+    prompt: Optional[str] = Form(None),
+    user_data = Depends(verify_token)
+):
+    try:
+        file_bytes = await file.read()
+        summary = generate_multimodal_summary(
+            file_bytes=file_bytes,
+            mime_type=file.content_type,
+            user_prompt=prompt
+        )
+        return {
+            "summary": summary
+        }
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
+
+
 @router.get("/notes")
 def get_notes():
 

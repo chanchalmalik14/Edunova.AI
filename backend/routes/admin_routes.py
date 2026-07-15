@@ -156,7 +156,8 @@ def add_user(request: AdminAddUserRequest, user_data = Depends(verify_token)):
     if exists:
         raise HTTPException(status_code=400, detail="User with this email already exists")
 
-    school_name = request.school_name or user_data.get("school_name", "")
+    admin_db = db["users"].find_one({"email": user_data.get("email")})
+    school_name = request.school_name or (admin_db.get("school_name", "") if admin_db else "")
     hashed_pw = hash_password(request.password)
     db["users"].insert_one({
         "full_name": request.full_name,
@@ -883,6 +884,128 @@ def get_reports_analytics(user_data=Depends(verify_token)):
             "notes_queries": notes_queries,
             "quizzes_generated": quizzes_generated
         }
+    }
+
+
+# SCHOOL CUSTOMIZATION & SETUP MODELS
+class SchoolSetupRequest(BaseModel):
+    logo_url: Optional[str] = ""
+    address: Optional[str] = ""
+    contact_number: Optional[str] = ""
+    academic_session: Optional[str] = ""
+    school_timings: Optional[str] = ""
+    attendance_rules: Optional[str] = ""
+    grading_system: Optional[str] = ""
+
+
+# BULK REGISTRATION SCHEMAS
+class StudentBulkRow(BaseModel):
+    admission_no: str
+    student_name: str
+    student_class: str
+    section: str
+    parent_number: Optional[str] = ""
+    email: str
+
+
+class BulkRegisterStudentsRequest(BaseModel):
+    students: List[StudentBulkRow]
+
+
+# SCHOOL DETAILS & UPDATE ENDPOINTS (PHASE 4)
+@router.get("/admin/school-details")
+def get_school_details(user_data=Depends(verify_token)):
+    admin_only(user_data)
+    admin_db = db["users"].find_one({"email": user_data.get("email")})
+    school_name = admin_db.get("school_name", "").strip() if admin_db else ""
+
+    school = db["schools"].find_one({"name": {"$regex": f"^{school_name}$", "$options": "i"}})
+    if not school:
+        return {
+            "name": school_name,
+            "logo_url": "",
+            "address": "",
+            "contact_number": "",
+            "academic_session": "2026-2027",
+            "school_timings": "08:00 AM - 02:30 PM",
+            "attendance_rules": "Minimum 75% attendance required",
+            "grading_system": "A+: 90-100, A: 80-89, B: 70-79, C: 60-69, Fail: <40"
+        }
+    
+    school["_id"] = str(school["_id"])
+    return {
+        "name": school.get("name"),
+        "logo_url": school.get("logo_url", ""),
+        "address": school.get("address", ""),
+        "contact_number": school.get("contact_number", ""),
+        "academic_session": school.get("academic_session", "2026-2027"),
+        "school_timings": school.get("school_timings", "08:00 AM - 02:30 PM"),
+        "attendance_rules": school.get("attendance_rules", "Minimum 75% attendance required"),
+        "grading_system": school.get("grading_system", "A+: 90-100, A: 80-89, B: 70-79, C: 60-69, Fail: <40")
+    }
+
+
+@router.put("/admin/school-setup")
+def update_school_setup(request: SchoolSetupRequest, user_data=Depends(verify_token)):
+    admin_only(user_data)
+    admin_db = db["users"].find_one({"email": user_data.get("email")})
+    school_name = admin_db.get("school_name", "").strip() if admin_db else ""
+
+    db["schools"].update_one(
+        {"name": {"$regex": f"^{school_name}$", "$options": "i"}},
+        {"$set": {
+            "logo_url": request.logo_url,
+            "address": request.address,
+            "contact_number": request.contact_number,
+            "academic_session": request.academic_session,
+            "school_timings": request.school_timings,
+            "attendance_rules": request.attendance_rules,
+            "grading_system": request.grading_system
+        }},
+        upsert=True
+    )
+    return {"message": "School details updated successfully"}
+
+
+# BULK STUDENT REGISTRATION ENDPOINT (PHASE 8)
+@router.post("/admin/bulk-register-students")
+def bulk_register_students(request: BulkRegisterStudentsRequest, user_data=Depends(verify_token)):
+    admin_only(user_data)
+    admin_db = db["users"].find_one({"email": user_data.get("email")})
+    school_name = admin_db.get("school_name", "").strip() if admin_db else ""
+
+    success_count = 0
+    duplicate_emails = []
+
+    # Default student password
+    hashed_default_pw = hash_password("123456")
+
+    for s in request.students:
+        email = s.email.strip()
+        existing = db["users"].find_one({"email": email})
+        if existing:
+            duplicate_emails.append(email)
+            continue
+
+        db["users"].insert_one({
+            "full_name": s.student_name,
+            "email": email,
+            "password": hashed_default_pw,
+            "role": "student",
+            "school_name": school_name,
+            "student_class": s.student_class,
+            "section": s.section,
+            "parent_number": s.parent_number,
+            "admission_no": s.admission_no,
+            "status": "active",
+            "registered_at": datetime.now().strftime("%Y-%m-%d %H:%M")
+        })
+        success_count += 1
+
+    return {
+        "message": f"Successfully registered {success_count} students.",
+        "success_count": success_count,
+        "duplicate_emails": duplicate_emails
     }
 
 

@@ -18,13 +18,14 @@ def create_assignment(
     assignment: AssignmentSchema,
     user_data = Depends(verify_token)
 ):
-
-    # Teacher only
     teacher_only(user_data)
 
     assignment_data = assignment.dict()
-
     assignment_data["created_by"] = user_data["email"]
+
+    teacher = db["users"].find_one({"email": user_data["email"]})
+    school_name = teacher.get("school_name", "") if teacher else ""
+    assignment_data["school_name"] = school_name
 
     assignment_collection.insert_one(
         assignment_data
@@ -33,26 +34,23 @@ def create_assignment(
     return {
         "message": "Assignment created successfully"
     }
+
+
 @router.get("/get-assignments")
 def get_assignments(
     user_data = Depends(verify_token)
 ):
-
-    student_class = user_data.get(
-        "student_class"
-    )
+    student_class = user_data.get("student_class")
+    student = db["users"].find_one({"email": user_data["email"]})
+    school_name = student.get("school_name", "") if student else ""
 
     assignments = list(
-
         assignment_collection.find(
             {
-                "student_class":
-                    student_class
+                "student_class": student_class,
+                "school_name": {"$regex": f"^{school_name}$", "$options": "i"}
             },
-
-            {
-                "_id": 0
-            }
+            {"_id": 0}
         )
     )
 
