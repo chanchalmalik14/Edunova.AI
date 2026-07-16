@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Upload, FileText, Users, LogOut, LayoutDashboard, Award, Settings, Calendar, Sun, Moon, Trash2, BookOpen, X } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
@@ -10,12 +10,15 @@ function UploadNotesPage() {
   const [uploading, setUploading] = useState(false);
   const [notes, setNotes] = useState([]);
   const [loadingNotes, setLoadingNotes] = useState(true);
+  const [title, setTitle] = useState("");
+  const [subject, setSubject] = useState("");
+  const [studentClass, setStudentClass] = useState("");
 
   useEffect(() => {
     const fetchNotes = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://127.0.0.1:8000/get-notes", { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch("http://127.0.0.1:8000/get-teacher-notes", { headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
         if (res.ok) setNotes(data.notes || []);
       } catch (err) { console.error("Failed to load notes:", err); }
@@ -33,20 +36,32 @@ function UploadNotesPage() {
 
   const handleUpload = async () => {
     if (selectedFiles.length === 0) { alert("Please select at least one file."); return; }
+    if (!subject) { alert("Please select a subject."); return; }
+    if (!studentClass) { alert("Please select a target class."); return; }
     setUploading(true);
     try {
       const token = localStorage.getItem("token");
       for (const file of selectedFiles) {
         const formData = new FormData();
         formData.append("file", file);
-        await fetch("http://127.0.0.1:8000/upload-note", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData });
+        formData.append("title", title || file.name);
+        formData.append("subject", subject);
+        formData.append("student_class", studentClass);
+        const res = await fetch("http://127.0.0.1:8000/upload-note", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: formData });
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.detail || "Failed to upload file");
+        }
       }
       alert("Files uploaded successfully!");
       setSelectedFiles([]);
-      const res = await fetch("http://127.0.0.1:8000/get-notes", { headers: { Authorization: `Bearer ${token}` } });
+      setTitle("");
+      setSubject("");
+      setStudentClass("");
+      const res = await fetch("http://127.0.0.1:8000/get-teacher-notes", { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       if (res.ok) setNotes(data.notes || []);
-    } catch (err) { console.error("Upload failed:", err); alert("Upload failed. Try again."); }
+    } catch (err) { console.error("Upload failed:", err); alert("Upload failed: " + err.message); }
     finally { setUploading(false); }
   };
 
@@ -91,7 +106,49 @@ function UploadNotesPage() {
         <h1 className="text-5xl font-light">Upload Notes</h1>
         <p className="text-gray-500 dark:text-gray-400 mt-3 text-lg">Upload PDFs and study material for your students.</p>
 
-        <div className="mt-10 bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 shadow-sm dark:shadow-none">
+        <div className="mt-10 bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/10 rounded-3xl p-8 shadow-sm dark:shadow-none space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <label className="block mb-2 text-sm text-gray-500 dark:text-gray-400">Notes Title (Optional)</label>
+              <input
+                type="text"
+                placeholder="Enter title (defaults to filename)"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3.5 outline-none focus:border-blue-500 text-gray-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block mb-2 text-sm text-gray-500 dark:text-gray-400">Subject</label>
+              <select
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3.5 outline-none focus:border-blue-500 text-gray-900 dark:text-white"
+              >
+                <option value="" disabled className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">-- Select Subject --</option>
+                <option value="Mathematics" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">Mathematics</option>
+                <option value="Science" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">Science</option>
+                <option value="English" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">English</option>
+                <option value="Social Science" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">Social Science</option>
+                <option value="Hindi" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">Hindi</option>
+              </select>
+            </div>
+            <div>
+              <label className="block mb-2 text-sm text-gray-500 dark:text-gray-400">Target Class</label>
+              <select
+                value={studentClass}
+                onChange={(e) => setStudentClass(e.target.value)}
+                className="w-full bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3.5 outline-none focus:border-blue-500 text-gray-900 dark:text-white"
+              >
+                <option value="" disabled className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">-- Select Class --</option>
+                <option value="9th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">9th Grade</option>
+                <option value="10th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">10th Grade</option>
+                <option value="11th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">11th Grade</option>
+                <option value="12th" className="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white">12th Grade</option>
+              </select>
+            </div>
+          </div>
+
           <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-white/20 rounded-2xl p-12 cursor-pointer hover:border-blue-400 transition">
             <Upload size={40} className="text-blue-400 mb-4"/>
             <p className="text-gray-500 dark:text-gray-400">Click to select files or drag and drop</p>
